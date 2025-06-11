@@ -1,15 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
 
-import { scaleQuantize } from 'd3-scale';
-import { schemeYlOrRd } from 'd3-scale-chromatic';
 import Map from './components/Map';
 import Legend from './components/Legend';
 import TimeSlider from './components/TimeSlider';
+import Treemap from './components/Treemap';
 import useAlquilerData from './hooks/useAlquilerData';
+import createColorScale from './utils/colorScale.js';
 
 function App() {
-  const { records, years, domainPrecio } = useAlquilerData();
-  const [year, setYear] = useState(years[years.length - 1]);
+  const [year, setYear] = useState(null);
+  const { records, years, domainPrecio, aggByCca } = useAlquilerData(year);
   useEffect(() => {
     if (years.length) {
       setYear(y => (y == null ? years[years.length - 1] : y));
@@ -17,10 +17,11 @@ function App() {
   }, [years]);
 
   const [provinciaSel, setProvinciaSel] = useState(null);
+  const [selectedCca, setSelectedCca] = useState(null);
 
   const domain = useMemo(() => domainPrecio(year), [domainPrecio, year]);
   const colorScale = useMemo(
-    () => scaleQuantize().domain(domain).range(schemeYlOrRd[7]),
+    () => (domain ? createColorScale(domain) : null),
     [domain]
   );
 
@@ -32,7 +33,19 @@ function App() {
       <h1>Dashboard de alquileres</h1>
       <TimeSlider years={years} year={year} setYear={setYear} />
       <Legend scale={colorScale} />
-      <Map data={records} year={year} colorScaleDomain={domain} onSelect={setProvinciaSel} />
+      <Treemap
+        data={aggByCca}
+        selectedCca={selectedCca}
+        onSelect={setSelectedCca}
+        colorDomain={domain}
+      />
+      <Map
+        data={records}
+        year={year}
+        colorScaleDomain={domain}
+        onSelect={setProvinciaSel}
+        selectedCca={selectedCca}
+      />
       {provinciaSel && <p>Provincia seleccionada: {provinciaSel}</p>}
     </div>
   );

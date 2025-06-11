@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
-import { scaleQuantize } from 'd3-scale';
-import { schemeYlOrRd } from 'd3-scale-chromatic';
 import provinceNames from '../utils/provinceNames.js';
+import provToCca from '../utils/provToCca.js';
+import createColorScale from '../utils/colorScale.js';
 
 const DEFAULT_WIDTH = 700;
 const DEFAULT_HEIGHT = 550;
 
-export default function Map({ data, year, colorScaleDomain, onSelect }) {
+export default function Map({ data, year, colorScaleDomain, onSelect, selectedCca }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -40,7 +40,7 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
   }, []);
 
   const colorScale = useMemo(
-    () => scaleQuantize().domain(colorScaleDomain).range(schemeYlOrRd[7]),
+    () => (colorScaleDomain ? createColorScale(colorScaleDomain) : null),
     [colorScaleDomain]
   );
 
@@ -98,6 +98,9 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
       .join('path')
       .attr('d', path)
       .attr('stroke', '#666')
+      .style('opacity', d =>
+        selectedCca && provToCca[d.id] !== selectedCca ? 0.2 : 1
+      )
       .on('click', (event, d) => {
         if (onSelect) onSelect(d.id);
       })
@@ -121,7 +124,7 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
         const val = values.get(d.id);
         return val != null ? color(val) : '#ccc';
       });
-  }, [features, data, year, colorScale, onSelect]);
+  }, [features, data, year, colorScale, onSelect, selectedCca]);
 
   useEffect(draw, [draw]);
 
