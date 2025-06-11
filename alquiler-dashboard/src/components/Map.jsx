@@ -15,15 +15,16 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
   const [features, setFeatures] = useState(null);
 
   useEffect(() => {
-    const div = d3.select('#root')
+    const div = d3
+      .select('#root')
       .append('div')
       .attr('id', 'tooltip')
       .style('position', 'absolute')
       .style('pointer-events', 'none')
       .style('opacity', 0)
-      .style('background', '#fff')
-      .style('color', '#000')
-      .style('border', '1px solid #ccc')
+      .style('background', 'rgba(0,0,0,.8)')
+      .style('color', '#fff')
+      .style('border', 'none')
       .style('padding', '4px 8px')
       .style('border-radius', '4px');
     tooltipRef.current = div;
@@ -137,7 +138,7 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
   }, [draw]);
 
   return (
-    <div ref={containerRef} style={{ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT }}>
+    <div ref={containerRef} style={{ width: '100%', height: DEFAULT_HEIGHT }}>
       <svg ref={svgRef} width={DEFAULT_WIDTH} height={DEFAULT_HEIGHT} role="img" />
     </div>
   );

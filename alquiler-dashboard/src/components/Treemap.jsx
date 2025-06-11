@@ -35,7 +35,7 @@ function Treemap({ data, onSelect, selectedCca, colorDomain }) {
   return (
     <svg
       ref={ref}
-      width={300}
+      width="100%"
       height={300}
       role="img"
       aria-label="Treemap alquiler por CCAA"

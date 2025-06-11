@@ -5,6 +5,7 @@ import Map from './components/Map';
 import Legend from './components/Legend';
 import TimeSlider from './components/TimeSlider';
 import Treemap from './components/Treemap';
+import './styles/dashboard.css';
 import useIndiceData from './hooks/useIndiceData';
 import provToCca from './utils/provToCca.js';
 import createColorScale from './utils/colorScale.js';
@@ -45,25 +46,43 @@ function App() {
 
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div>
       <h1>Dashboard de alquileres</h1>
-      <TimeSlider years={years} year={year} setYear={setYear} />
-      <Legend scale={colorScale} />
-      <Treemap
-        data={aggByCca}
-        selectedCca={selectedCca}
-        onSelect={setSelectedCca}
-        colorDomain={colorDomain}
-      />
-      <Map
-        data={records}
-        year={year}
-        tam={tam}
-        colorScaleDomain={colorDomain}
-        onSelect={setProvinciaSel}
-        selectedCca={selectedCca}
-      />
-      {provinciaSel && <p>Provincia seleccionada: {provinciaSel}</p>}
+      <div className="controls">
+        <TimeSlider years={years} year={year} setYear={setYear} />
+      </div>
+
+      <div className="grid-dash">
+        <div className="card" role="region" aria-label="Leyenda de colores">
+          <Legend scale={colorScale} />
+        </div>
+        <div className="card" role="region" aria-label="Treemap por comunidad">
+          <Treemap
+            data={aggByCca}
+            selectedCca={selectedCca}
+            onSelect={setSelectedCca}
+            colorDomain={colorDomain}
+          />
+        </div>
+        <div
+          className="card"
+          style={{ gridColumn: '1 / span 2' }}
+          role="region"
+          aria-label="Mapa de alquileres por provincia"
+        >
+          <Map
+            data={records}
+            year={year}
+            tam={tam}
+            colorScaleDomain={colorDomain}
+            onSelect={setProvinciaSel}
+            selectedCca={selectedCca}
+          />
+        </div>
+      </div>
+      {provinciaSel && (
+        <footer>Provincia seleccionada: {provinciaSel}</footer>
+      )}
     </div>
   );
 }

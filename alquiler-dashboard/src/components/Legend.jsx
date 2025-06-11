@@ -3,13 +3,15 @@ export default function Legend({ scale }) {
   if (scale && typeof scale.invertExtent === 'function') {
     const rects = scale.range();
     const last = scale.invertExtent(rects[rects.length - 1])[1];
+    const width = rects.length * 25;
     return (
-      <svg
-        width={rects.length * 25}
-        height={24}
-        aria-label="leyenda"
-        role="img"
-      >
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <svg
+          width={width}
+          height={24}
+          aria-label="leyenda"
+          role="img"
+        >
         {rects.map((c, i) => {
           const [t0] = scale.invertExtent(c);
           return (
@@ -29,7 +31,8 @@ export default function Legend({ scale }) {
         >
           {last.toFixed ? last.toFixed(0) : last}
         </text>
-      </svg>
+        </svg>
+      </div>
     );
   }
 
