@@ -1,55 +1,72 @@
 import { useState, useMemo, useEffect } from 'react';
-import * as d3 from 'd3';
 
 import Map from './components/Map';
 import Legend from './components/Legend';
-import TimeSlider from './components/TimeSlider';
 import Treemap from './components/Treemap';
 import './styles/dashboard.css';
 import useIndiceData from './hooks/useIndiceData';
-import provToCca from './utils/provToCca.js';
 import createColorScale from './utils/colorScale.js';
 
 function App() {
-  const { records, years, domain } = useIndiceData();
-  const [year, setYear] = useState(years.at(-1));
-  const [tam, _setTam] = useState('Total');
+  const { records, years, sizeOptions, getFiltered, domain } = useIndiceData();
+  const minYear = years[0];
+  const maxYear = years[years.length - 1];
+  const [from, setFrom] = useState(minYear);
+  const [to, setTo] = useState(maxYear);
+  const [size, setSize] = useState('Total');
 
   useEffect(() => {
-    if (years.length) setYear(y => (y == null ? years.at(-1) : y));
-  }, [years]);
+    if (years.length) {
+      setFrom(y => (y == null ? minYear : y));
+      setTo(t => (t == null ? maxYear : t));
+    }
+  }, [years, minYear, maxYear]);
 
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [selectedCca, setSelectedCca] = useState(null);
 
-  const colorDomain = domain(year, tam);
+  const filtered = useMemo(
+    () => getFiltered({ from, to, size }),
+    [getFiltered, from, to, size]
+  );
+
+  const colorDomain = domain(filtered);
   const colorScale = useMemo(
     () => (colorDomain ? createColorScale(colorDomain) : null),
     [colorDomain]
   );
 
-  const aggByCca = useMemo(() => {
-    if (!records || year == null) return [];
-    return d3
-      .rollups(
-        records.filter(r => r.anio === year && r.tamano === tam),
-        v => ({
-          alquiler: d3.mean(v, d => d.indice),
-          poblacion: v.length,
-        }),
-        d => provToCca[d.cod_provincia]
-      )
-      .map(([cca, vals]) => ({ cca, ...vals }));
-  }, [records, year, tam]);
-
-  if (!records || year == null) return <p>Cargando datos…</p>;
+  if (!records.length) return <p>Cargando datos…</p>;
 
 
   return (
     <div>
       <h1>Dashboard de alquileres</h1>
       <div className="controls">
-        <TimeSlider years={years} year={year} setYear={setYear} />
+        <label>Tamaño:</label>
+        <select value={size} onChange={e => setSize(e.target.value)}>
+          {sizeOptions.map(o => (
+            <option key={o}>{o}</option>
+          ))}
+        </select>
+        <label>Años:</label>
+        <input
+          type="range"
+          min={minYear}
+          max={maxYear}
+          value={from}
+          onChange={e => setFrom(+e.target.value)}
+          aria-label="Desde"
+        />
+        <input
+          type="range"
+          min={minYear}
+          max={maxYear}
+          value={to}
+          onChange={e => setTo(+e.target.value)}
+          aria-label="Hasta"
+        />
+        <span>{from}-{to}</span>
       </div>
 
       <div className="grid-dash">
@@ -58,7 +75,7 @@ function App() {
         </div>
         <div className="card" role="region" aria-label="Treemap por comunidad">
           <Treemap
-            data={aggByCca}
+            filtered={filtered}
             selectedCca={selectedCca}
             onSelect={setSelectedCca}
             colorDomain={colorDomain}
@@ -71,9 +88,7 @@ function App() {
           aria-label="Mapa de alquileres por provincia"
         >
           <Map
-            data={records}
-            year={year}
-            tam={tam}
+            filtered={filtered}
             colorScaleDomain={colorDomain}
             onSelect={setProvinciaSel}
             selectedCca={selectedCca}

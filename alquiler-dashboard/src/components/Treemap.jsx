@@ -2,14 +2,25 @@ import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { hierarchy, treemap } from 'd3-hierarchy';
 import ccaNames from '../utils/ccaNames.js';
+import provToCca from '../utils/provToCca.js';
 import colorScale from '../utils/colorScale.js';
 
-function Treemap({ data, onSelect, selectedCca, colorDomain }) {
+function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
   const ref = useRef(null);
 
   useEffect(() => {
-    if (!data) return;
+    if (!filtered) return;
     const scale = colorScale(colorDomain);
+    const data = d3
+      .rollups(
+        filtered,
+        v => ({
+          alquiler: d3.mean(v, d => d.valor),
+          poblacion: v.length,
+        }),
+        d => provToCca[d.cod_provincia]
+      )
+      .map(([cca, vals]) => ({ cca, ...vals }));
     const root = hierarchy({ children: data }).sum(d => d.poblacion);
     treemap().size([300, 300]).padding(1)(root);
 
@@ -29,8 +40,13 @@ function Treemap({ data, onSelect, selectedCca, colorDomain }) {
       .selectAll('title')
       .data(d => [d])
       .join('title')
-      .text(d => `${ccaNames[d.data.cca]}: ${d.data.alquiler.toFixed(1)} €`);
-  }, [data, selectedCca, colorDomain]);
+      .text(
+        d =>
+          `${ccaNames[d.data.cca]}: ${d.data.alquiler
+            .toFixed(1)
+            .replace('.', ',')}`
+      );
+  }, [filtered, selectedCca, colorDomain, onSelect]);
 
   return (
     <svg
