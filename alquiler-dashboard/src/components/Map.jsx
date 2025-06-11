@@ -8,7 +8,7 @@ import createColorScale from '../utils/colorScale.js';
 const DEFAULT_WIDTH = 700;
 const DEFAULT_HEIGHT = 550;
 
-export default function Map({ data, year, colorScaleDomain, onSelect, selectedCca }) {
+export default function Map({ data, year, tam, colorScaleDomain, onSelect, selectedCca }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -81,13 +81,14 @@ export default function Map({ data, year, colorScaleDomain, onSelect, selectedCc
 
     const values = d3.rollup(
       data.filter(
-        d => d.anio === year && d.Total != null && !Number.isNaN(+d.Total)
+        d =>
+          d.anio === year &&
+          d.tamano === tam &&
+          d.indice != null &&
+          !Number.isNaN(d.indice)
       ),
-      v => d3.mean(v, d => +d.Total),
-      d => {
-        const m = /^\d{2}/.exec(d.Municipio || '');
-        return m ? m[0].padStart(2, '0') : null;
-      }
+      v => d3.mean(v, d => d.indice),
+      d => d.cod_provincia
     );
 
     const color = colorScale;
@@ -124,7 +125,7 @@ export default function Map({ data, year, colorScaleDomain, onSelect, selectedCc
         const val = values.get(d.id);
         return val != null ? color(val) : '#ccc';
       });
-  }, [features, data, year, colorScale, onSelect, selectedCca]);
+  }, [features, data, year, tam, colorScale, onSelect, selectedCca]);
 
   useEffect(draw, [draw]);
 
