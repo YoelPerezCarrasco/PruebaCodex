@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
-import { interpolateRdYlBu } from 'd3-scale-chromatic';
+import { scaleQuantize } from 'd3-scale';
+import { schemeYlOrRd } from 'd3-scale-chromatic';
+import provinceNames from '../utils/provinceNames.js';
 
 const DEFAULT_WIDTH = 700;
 const DEFAULT_HEIGHT = 550;
@@ -38,19 +40,18 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
   }, []);
 
   const colorScale = useMemo(
-    () =>
-      d3
-        .scaleSequential()
-        .domain(colorScaleDomain)
-        .interpolator(interpolateRdYlBu),
+    () => scaleQuantize().domain(colorScaleDomain).range(schemeYlOrRd[7]),
     [colorScaleDomain]
   );
 
-  const showTooltip = (name, val, event) => {
+  const showTooltip = (id, val, event) => {
     if (!tooltipRef.current) return;
+    const name = provinceNames[id] || `Provincia ${id}`;
     tooltipRef.current
-      .text(
-        `${name}: ${val != null && !Number.isNaN(val) ? val.toFixed(2) : 'N/A'} €`
+      .html(
+        `<strong>${name}</strong><br/>${
+          val != null && !Number.isNaN(val) ? val.toFixed(1) + ' €' : 'Sin dato'
+        }`
       )
       .style('left', `${event.pageX + 10}px`)
       .style('top', `${event.pageY + 10}px`)
@@ -102,20 +103,20 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
       })
       .on('mouseenter', (event, f) => {
         const val = values.get(f.id);
-        showTooltip(f.properties.name, val, event);
+        showTooltip(f.id, val, event);
       })
       .on('mouseleave', hideTooltip)
       .each(function (d) {
         d3.select(this)
           .selectAll('title')
-          .data([d.properties.name])
+          .data([provinceNames[d.id] || `Provincia ${d.id}`])
           .join('title')
           .text(t => t);
       });
 
     paths
       .transition()
-      .duration(400)
+      .duration(600)
       .attr('fill', d => {
         const val = values.get(d.id);
         return val != null ? color(val) : '#ccc';
