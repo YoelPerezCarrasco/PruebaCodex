@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { interpolateRdYlBu } from 'd3-scale-chromatic';
@@ -37,10 +37,21 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
     load();
   }, []);
 
+  const colorScale = useMemo(
+    () =>
+      d3
+        .scaleSequential()
+        .domain(colorScaleDomain)
+        .interpolator(interpolateRdYlBu),
+    [colorScaleDomain]
+  );
+
   const showTooltip = (name, val, event) => {
     if (!tooltipRef.current) return;
     tooltipRef.current
-      .text(`${name}: ${val != null ? val.toFixed(2) : 'N/A'} €`)
+      .text(
+        `${name}: ${val != null && !Number.isNaN(val) ? val.toFixed(2) : 'N/A'} €`
+      )
       .style('left', `${event.pageX + 10}px`)
       .style('top', `${event.pageY + 10}px`)
       .transition()
@@ -78,10 +89,7 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
       }
     );
 
-    const color = d3
-      .scaleSequential()
-      .domain(colorScaleDomain)
-      .interpolator(interpolateRdYlBu);
+    const color = colorScale;
 
     const paths = svg
       .selectAll('path')
@@ -112,7 +120,7 @@ export default function Map({ data, year, colorScaleDomain, onSelect }) {
         const val = values.get(d.id);
         return val != null ? color(val) : '#ccc';
       });
-  }, [features, data, year, colorScaleDomain, onSelect]);
+  }, [features, data, year, colorScale, onSelect]);
 
   useEffect(draw, [draw]);
 

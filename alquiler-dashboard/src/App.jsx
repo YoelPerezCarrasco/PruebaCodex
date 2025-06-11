@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 
-import * as d3 from 'd3';
 import { interpolateRdYlBu } from 'd3-scale-chromatic';
 import Map from './components/Map';
 import Legend from './components/Legend';
