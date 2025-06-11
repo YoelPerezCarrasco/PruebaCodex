@@ -1,14 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
+import { interpolateRdYlBu } from 'd3-scale-chromatic';
 
 const DEFAULT_WIDTH = 700;
 const DEFAULT_HEIGHT = 550;
 
-export default function Map({ data, onSelect }) {
+export default function Map({ data, year, colorScaleDomain, onSelect }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
+  const tooltipRef = useRef(null);
   const [features, setFeatures] = useState(null);
+
+  useEffect(() => {
+    const div = d3.select('#root')
+      .append('div')
+      .attr('id', 'tooltip')
+      .style('position', 'absolute')
+      .style('pointer-events', 'none')
+      .style('opacity', 0)
+      .style('background', '#fff')
+      .style('border', '1px solid #ccc')
+      .style('padding', '4px 8px')
+      .style('border-radius', '4px');
+    tooltipRef.current = div;
+    return () => div.remove();
+  }, []);
 
   // load topojson once
   useEffect(() => {
@@ -20,7 +37,26 @@ export default function Map({ data, onSelect }) {
     load();
   }, []);
 
-  const draw = () => {
+  const showTooltip = (name, val, event) => {
+    if (!tooltipRef.current) return;
+    tooltipRef.current
+      .text(`${name}: ${val != null ? val.toFixed(2) : 'N/A'} €`)
+      .style('left', `${event.pageX + 10}px`)
+      .style('top', `${event.pageY + 10}px`)
+      .transition()
+      .duration(150)
+      .style('opacity', 1);
+  };
+
+  const hideTooltip = () => {
+    if (!tooltipRef.current) return;
+    tooltipRef.current
+      .transition()
+      .duration(150)
+      .style('opacity', 0);
+  };
+
+  const draw = useCallback(() => {
     if (!features) return;
     const container = containerRef.current;
     const svg = d3.select(svgRef.current);
@@ -31,29 +67,64 @@ export default function Map({ data, onSelect }) {
     const path = d3.geoPath(projection);
     projection.fitSize([width, height], { type: 'FeatureCollection', features });
 
-    svg
+    const values = d3.rollup(
+      data.filter(
+        d => d.anio === year && d.Total != null && !Number.isNaN(+d.Total)
+      ),
+      v => d3.mean(v, d => +d.Total),
+      d => {
+        const m = /^\d{2}/.exec(d.Municipio || '');
+        return m ? m[0].padStart(2, '0') : null;
+      }
+    );
+
+    const color = d3
+      .scaleSequential()
+      .domain(colorScaleDomain)
+      .interpolator(interpolateRdYlBu);
+
+    const paths = svg
       .selectAll('path')
-      .data(features)
+      .data(features, d => d.id)
       .join('path')
       .attr('d', path)
-      .attr('stroke', '#999')
-      .attr('fill', '#eee')
+      .attr('stroke', '#666')
       .on('click', (event, d) => {
         if (onSelect) onSelect(d.id);
+      })
+      .on('mouseenter', (event, f) => {
+        const val = values.get(f.id);
+        showTooltip(f.properties.name, val, event);
+      })
+      .on('mouseleave', hideTooltip)
+      .each(function (d) {
+        d3.select(this)
+          .selectAll('title')
+          .data([d.properties.name])
+          .join('title')
+          .text(t => t);
       });
-  };
 
-  useEffect(draw, [features]);
+    paths
+      .transition()
+      .duration(400)
+      .attr('fill', d => {
+        const val = values.get(d.id);
+        return val != null ? color(val) : '#ccc';
+      });
+  }, [features, data, year, colorScaleDomain, onSelect]);
+
+  useEffect(draw, [draw]);
 
   useEffect(() => {
     const obs = new ResizeObserver(draw);
     if (containerRef.current) obs.observe(containerRef.current);
     return () => obs.disconnect();
-  }, [features]);
+  }, [draw]);
 
   return (
     <div ref={containerRef} style={{ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT }}>
-      <svg ref={svgRef} width={DEFAULT_WIDTH} height={DEFAULT_HEIGHT} />
+      <svg ref={svgRef} width={DEFAULT_WIDTH} height={DEFAULT_HEIGHT} role="img" />
     </div>
   );
 }

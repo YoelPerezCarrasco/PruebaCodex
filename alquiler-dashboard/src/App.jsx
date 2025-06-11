@@ -1,17 +1,36 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import * as d3 from 'd3';
+import { interpolateRdYlBu } from 'd3-scale-chromatic';
 import Map from './components/Map';
+import Legend from './components/Legend';
 import useAlquilerData from './hooks/useAlquilerData';
 
 function App() {
-  const { records } = useAlquilerData();
+  const { records, years } = useAlquilerData();
+  const [year, setYear] = useState(null);
+  useEffect(() => {
+    if (years.length) {
+      setYear(years[years.length - 1]);
+    }
+  }, [years]);
   const [provinciaSel, setProvinciaSel] = useState(null);
 
-  if (!records) return <p>Cargando datos…</p>;
+  const domain = useMemo(() => {
+    const vals = records
+      .filter(
+        r => year != null && r.anio === year && r.Total != null && !Number.isNaN(+r.Total)
+      )
+      .map(r => +r.Total);
+    return [d3.min(vals), d3.max(vals)];
+  }, [records, year]);
+
+  if (!records || year == null) return <p>Cargando datos…</p>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h1>Dashboard de alquileres</h1>
-      <Map data={records} onSelect={setProvinciaSel} />
+      <Legend domain={domain} interpolator={interpolateRdYlBu} />
+      <Map data={records} year={year} colorScaleDomain={domain} onSelect={setProvinciaSel} />
       {provinciaSel && <p>Provincia seleccionada: {provinciaSel}</p>}
     </div>
   );
