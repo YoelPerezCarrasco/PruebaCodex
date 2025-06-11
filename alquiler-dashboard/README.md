@@ -13,9 +13,9 @@ npm i
 npm run dev
 ```
 
-## Interacción temporal: deslizador + play
+## Controles
 
-Ahora puedes elegir el año con un deslizador y reproducir la evolución automáticamente con el botón de play.
+Puedes escoger el **tamaño de la vivienda** con un desplegable y filtrar los datos por un **rango de años** usando dos deslizadores. El intervalo seleccionado aparece junto a los controles.
 
 ## Vista agregada por CCAA
 

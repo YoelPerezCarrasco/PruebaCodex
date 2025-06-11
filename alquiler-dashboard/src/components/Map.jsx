@@ -8,7 +8,7 @@ import createColorScale from '../utils/colorScale.js';
 const DEFAULT_WIDTH = 700;
 const DEFAULT_HEIGHT = 550;
 
-export default function Map({ data, year, tam, colorScaleDomain, onSelect, selectedCca }) {
+export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -51,8 +51,10 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
     const name = provinceNames[id] || `Provincia ${id}`;
     tooltipRef.current
       .html(
-        `<strong>${name}</strong><br/>${
-          val != null && !Number.isNaN(val) ? val.toFixed(1) + ' pts' : 'Sin dato'
+        `<strong>${name}</strong><br/>Índice: ${
+          val != null && !Number.isNaN(val)
+            ? val.toFixed(1).replace('.', ',')
+            : 'Sin dato'
         }`
       )
       .style('left', `${event.pageX + 10}px`)
@@ -82,14 +84,8 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
     projection.fitSize([width, height], { type: 'FeatureCollection', features });
 
     const values = d3.rollup(
-      data.filter(
-        d =>
-          d.anio === year &&
-          d.tamano === tam &&
-          d.indice != null &&
-          !Number.isNaN(d.indice)
-      ),
-      v => d3.mean(v, d => d.indice),
+      filtered.filter(d => d.valor != null && !Number.isNaN(d.valor)),
+      v => d3.mean(v, d => d.valor),
       d => d.cod_provincia
     );
 
@@ -127,7 +123,7 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
         const val = values.get(d.id);
         return val != null ? color(val) : '#ccc';
       });
-  }, [features, data, year, tam, colorScale, onSelect, selectedCca]);
+  }, [features, filtered, colorScale, onSelect, selectedCca]);
 
   useEffect(draw, [draw]);
 
