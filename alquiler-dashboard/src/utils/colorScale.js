@@ -1,6 +1,15 @@
 import { scaleQuantize } from 'd3-scale';
-import { schemeYlOrRd } from 'd3-scale-chromatic';
 
-export default function colorScale(domain) {
-  return scaleQuantize().domain(domain).range(schemeYlOrRd[7]);
+const greyBlue7 = [
+  '#f2f2f2',
+  '#e0e0e0',
+  '#c6d4e6',
+  '#9ebede',
+  '#6d9fd0',
+  '#397cb6',
+  '#08306b',
+];
+
+export default function createColorScale(domain) {
+  return scaleQuantize(domain, greyBlue7);
 }
