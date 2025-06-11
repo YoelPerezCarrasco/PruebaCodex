@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import * as d3 from 'd3';
 import { interpolateRdYlBu } from 'd3-scale-chromatic';
 import Map from './components/Map';
@@ -7,17 +7,24 @@ import useAlquilerData from './hooks/useAlquilerData';
 
 function App() {
   const { records, years } = useAlquilerData();
-  const [year, _setYear] = useState(years[years.length - 1]);
+  const [year, setYear] = useState(null);
+  useEffect(() => {
+    if (years.length) {
+      setYear(years[years.length - 1]);
+    }
+  }, [years]);
   const [provinciaSel, setProvinciaSel] = useState(null);
 
   const domain = useMemo(() => {
     const vals = records
-      .filter(r => r.anio === year && r.Total != null && !Number.isNaN(+r.Total))
+      .filter(
+        r => year != null && r.anio === year && r.Total != null && !Number.isNaN(+r.Total)
+      )
       .map(r => +r.Total);
     return [d3.min(vals), d3.max(vals)];
   }, [records, year]);
 
-  if (!records) return <p>Cargando datos…</p>;
+  if (!records || year == null) return <p>Cargando datos…</p>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
