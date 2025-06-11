@@ -22,6 +22,7 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
       .style('pointer-events', 'none')
       .style('opacity', 0)
       .style('background', '#fff')
+      .style('color', '#000')
       .style('border', '1px solid #ccc')
       .style('padding', '4px 8px')
       .style('border-radius', '4px');
@@ -50,7 +51,7 @@ export default function Map({ data, year, tam, colorScaleDomain, onSelect, selec
     tooltipRef.current
       .html(
         `<strong>${name}</strong><br/>${
-          val != null && !Number.isNaN(val) ? val.toFixed(1) + ' €' : 'Sin dato'
+          val != null && !Number.isNaN(val) ? val.toFixed(1) + ' pts' : 'Sin dato'
         }`
       )
       .style('left', `${event.pageX + 10}px`)
