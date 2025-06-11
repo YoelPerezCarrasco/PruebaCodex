@@ -1,29 +1,38 @@
-import { useId } from 'react';
-import * as d3 from 'd3';
+export default function Legend({ scale }) {
 
-export default function Legend({ domain, interpolator }) {
-  const id = useId();
-  const gradientId = `grad-${id}`;
-  const [min, max] = domain;
+  if (scale && typeof scale.invertExtent === 'function') {
+    const colors = scale.range();
+    const stepWidth = 20;
+    const last = scale.invertExtent(colors[colors.length - 1])[1];
+    return (
+      <svg
+        width={colors.length * stepWidth}
+        height={20}
+        aria-label="leyenda"
+        role="img"
+      >
+        {colors.map((c, i) => {
+          const [t0] = scale.invertExtent(c);
+          return (
+            <g key={c}>
+              <rect x={i * stepWidth} y={4} width={stepWidth} height={12} fill={c} />
+              <text x={i * stepWidth} y={18} fontSize={10} textAnchor="start">
+                {t0.toFixed ? t0.toFixed(0) : t0}
+              </text>
+            </g>
+          );
+        })}
+        <text
+          x={colors.length * stepWidth}
+          y={18}
+          fontSize={10}
+          textAnchor="end"
+        >
+          {last.toFixed ? last.toFixed(0) : last}
+        </text>
+      </svg>
+    );
+  }
 
-  const stops = d3.range(0, 1.01, 0.01).map(t => (
-    <stop key={t} offset={`${t * 100}%`} stopColor={interpolator(t)} />
-  ));
-
-  return (
-    <svg width={200} height={20} aria-label="leyenda" role="img">
-      <defs>
-        <linearGradient id={gradientId} x1="0%" x2="100%">
-          {stops}
-        </linearGradient>
-      </defs>
-      <rect x={0} y={4} width={200} height={12} fill={`url(#${gradientId})`} />
-      <text x={0} y={18} fontSize={10} textAnchor="start">
-        {min.toFixed ? min.toFixed(0) : min}
-      </text>
-      <text x={200} y={18} fontSize={10} textAnchor="end">
-        {max.toFixed ? max.toFixed(0) : max}
-      </text>
-    </svg>
-  );
+  return null;
 }
