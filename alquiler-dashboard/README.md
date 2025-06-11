@@ -22,3 +22,8 @@ Ahora puedes elegir el año con un deslizador y reproducir la evolución automá
 Se incluye un treemap con el alquiler medio de cada comunidad autónoma.
 Al hacer clic en una región del treemap, el mapa se filtra y se grisarán
 las provincias que no pertenecen a la comunidad seleccionada.
+
+## Estilo y diseño
+
+La interfaz usa un *dashboard* oscuro con tarjetas y cuadrícula CSS Grid.
+![Captura del nuevo diseño](TODO)
