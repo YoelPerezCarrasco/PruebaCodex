@@ -1,18 +1,20 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Range } from 'react-range';
-import * as d3 from 'd3';
 
 import Map from './components/Map';
 import Legend from './components/Legend';
 import Treemap from './components/Treemap';
-import LineChart from './components/LineChart';
+import Histogram from './components/Histogram';
+import Scatter from './components/Scatter';
 import './styles/dashboard.css';
 import useAlquilerEuros from './hooks/useAlquilerEuros';
+import useIndiceData from './hooks/useIndiceData';
 import createColorScale from './utils/colorScale.js';
-import provToCca from './utils/provToCca.js';
+import provinceNames from './utils/provinceNames.js';
 
 function App() {
   const { records, years, getByYear } = useAlquilerEuros();
+  const { records: indiceRecords } = useIndiceData();
   const minYear = years[0];
   const maxYear = years[years.length - 1];
   const [range, setRange] = useState([]);
@@ -70,18 +72,19 @@ function App() {
     [colorDomain]
   );
 
-  const serie = useMemo(() => {
-    const src = selectedCca
-      ? filtered.filter(d => provToCca[d.cod_provincia] === selectedCca)
-      : filtered;
-    return d3
-      .rollups(
-        src,
-        v => d3.mean(v, d => d.euros_m2),
-        d => d.anio
-      )
-      .map(([anio, euros]) => ({ anio, euros }));
-  }, [filtered, selectedCca]);
+  const histoData = filtered.map(d => d.euros_m2);
+  const yearMid = range.length ? Math.round((range[0] + range[1]) / 2) : null;
+  const scatterPts = useMemo(() => {
+    if (!indiceRecords.length || yearMid == null) return [];
+    return indiceRecords
+      .filter(d => d.anio === yearMid && d.tam === 'Total')
+      .map(d => ({
+        prov: provinceNames[d.cod_provincia] || d.cod_provincia,
+        euros: d.euros,
+        indice: d.valor,
+      }));
+  }, [indiceRecords, yearMid]);
+
 
   if (!records.length) return <p>Cargando datos…</p>;
 
@@ -121,8 +124,11 @@ function App() {
             colorDomain={colorDomain}
           />
         </div>
-        <div className="card line" aria-label="Evolución €/m²" key="line">
-          <LineChart data={serie} selectedProv={selectedCca} />
+        <div className="card histo" key="histo">
+          <Histogram data={histoData} />
+        </div>
+        <div className="card scatter" key="scatter">
+          <Scatter points={scatterPts} />
         </div>
         <div
           className="card map"

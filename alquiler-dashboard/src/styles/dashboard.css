@@ -38,14 +38,15 @@ h1 { font-size: clamp(1.8rem, 3vw, 2.8rem); margin: .5rem 0 1rem; }
     display: grid;
     grid-template-columns: 340px 1fr;
     grid-template-areas:
-      "legend  map"
-      "treemap map"
-      "parallel map";
+      "legend   map"
+      "treemap  map"
+      "histo    map"
+      "scatter  map";
     gap: 1rem;
   }
   .card.legend { grid-area: legend; }
   .card.treemap { grid-area: treemap; }
-  .card.parallel { grid-area: parallel; }
-  .card.line { grid-area: parallel; } /* ocupa el hueco vacío */
+  .card.histo { grid-area: histo; }
+  .card.scatter { grid-area: scatter; }
   .card.map { grid-area: map; }
 }
