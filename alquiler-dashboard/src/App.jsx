@@ -1,12 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Range } from 'react-range';
+import * as d3 from 'd3';
 
 import Map from './components/Map';
 import Legend from './components/Legend';
 import Treemap from './components/Treemap';
+import LineChart from './components/LineChart';
 import './styles/dashboard.css';
 import useAlquilerEuros from './hooks/useAlquilerEuros';
 import createColorScale from './utils/colorScale.js';
+import provToCca from './utils/provToCca.js';
 
 function App() {
   const { records, years, getFiltered } = useAlquilerEuros();
@@ -82,6 +85,19 @@ function App() {
     [colorDomain]
   );
 
+  const serie = useMemo(() => {
+    const src = selectedCca
+      ? filtered.filter(d => provToCca[d.cod_provincia] === selectedCca)
+      : filtered;
+    return d3
+      .rollups(
+        src,
+        v => d3.mean(v, d => d.euros_m2),
+        d => d.anio
+      )
+      .map(([anio, euros]) => ({ anio, euros }));
+  }, [filtered, selectedCca]);
+
   if (!records.length) return <p>Cargando datos…</p>;
 
 
@@ -113,6 +129,9 @@ function App() {
             onSelect={setSelectedCca}
             colorDomain={colorDomain}
           />
+        </div>
+        <div className="card line" aria-label="Evolución €/m²" key="line">
+          <LineChart data={serie} selectedProv={selectedCca} />
         </div>
         <div
           className="card map"
