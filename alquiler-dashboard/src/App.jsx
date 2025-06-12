@@ -70,10 +70,10 @@ function App() {
       </div>
 
       <div className="grid-dash">
-        <div className="card" role="region" aria-label="Leyenda de colores">
+        <div className="card" role="region" aria-label="Leyenda de colores" key="legend">
           <Legend scale={colorScale} />
         </div>
-        <div className="card" role="region" aria-label="Treemap por comunidad">
+        <div className="card" role="region" aria-label="Treemap por comunidad" key="treemap">
           <Treemap
             filtered={filtered}
             selectedCca={selectedCca}
@@ -86,6 +86,7 @@ function App() {
           style={{ gridColumn: '1 / span 2' }}
           role="region"
           aria-label="Mapa de alquileres por provincia"
+          key="map"
         >
           <Map
             filtered={filtered}
