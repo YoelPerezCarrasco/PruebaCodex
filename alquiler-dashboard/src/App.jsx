@@ -100,7 +100,16 @@ function App() {
         <div className="card legend" role="region" aria-label="Leyenda de colores" key="legend">
           <Legend scale={colorScale} />
         </div>
-        <div className="card treemap" role="region" aria-label="Treemap por comunidad" key="treemap">
+        <button onClick={() => setSelectedCca(null)} disabled={!selectedCca}>
+          Reset CCAA
+        </button>
+        <div
+          className="card treemap"
+          role="region"
+          aria-label="Treemap por comunidad"
+          key="treemap"
+          onClick={() => setSelectedCca(null)}
+        >
           <Treemap
             filtered={filtered}
             selectedCca={selectedCca}
