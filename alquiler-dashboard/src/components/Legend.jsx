@@ -15,7 +15,7 @@ export default function Legend({ scale }) {
         {rects.map((c, i) => {
           const [t0] = scale.invertExtent(c);
           return (
-            <g key={c}>
+            <g key={i}>
               <rect x={i * 25} width={24} height={12} fill={c} />
               <text x={i * 25} y={22} fontSize={10} textAnchor="start">
                 {t0.toFixed ? t0.toFixed(0) : t0}
