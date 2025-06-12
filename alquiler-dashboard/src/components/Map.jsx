@@ -1,3 +1,4 @@
+/* ───── Tarjeta Mapa: alquiler medio por provincia ───── */
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';

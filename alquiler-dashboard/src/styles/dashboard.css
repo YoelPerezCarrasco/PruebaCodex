@@ -1,41 +1,7 @@
-:root {
-  --bg: #131313;
-  --card: #1e1e1e;
-  --card-border: #2a2a2a;
-  --accent: #6d9fd0;
-  --text: #eaeaea;
-  font-family: system-ui, 'Inter', sans-serif;
-}
-body { background: var(--bg); color: var(--text); }
-h1 { font-size: clamp(1.8rem, 3vw, 2.8rem); margin: .5rem 0 1rem; }
-.grid-dash {
-  display: grid;
-  grid-template-areas:
-    "treemap   map      scatter"
-    "line      legend   scatter"
-    ".         legend   .";
-  grid-template-columns: 320px 1fr 340px;
-  grid-template-rows: auto 120px 20px;
-  gap: 1rem;
-}
-.card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.6);
-  padding: .75rem;
-  transition: transform .2s ease, box-shadow .2s ease;
-  min-width: 0;
-}
-.card:hover { transform: translateY(-4px); box-shadow:0 4px 8px rgba(0,0,0,.6);} 
-#tooltip {
-  background: rgba(0,0,0,.8) !important;
-  border: none !important;
-  color: #fff !important;
-}
-.card.treemap { grid-area: treemap; }
-.card.map { grid-area: map; min-height: 520px; }
-.card.legend { grid-area: legend; }
-.card.scatter { grid-area: scatter; }
-.card.line { grid-area: line; }
+.dashboard-wrap   { @apply flex flex-col items-center gap-4 max-w-screen-xl mx-auto px-4 pb-8; }
+.dashboard-row    { @apply flex flex-wrap justify-center gap-4 w-full; }
+.dashboard-row>*  { flex: 1 1 320px; }
+.card.map         { flex: 1 1 600px; min-height: 520px; }
+.card.legend      { @apply w-full flex justify-center; }
+#tooltip { background: rgba(0,0,0,.8) !important; border: none !important; color: #fff !important; }
 .card.map svg { width: 100%; height: 100%; }
