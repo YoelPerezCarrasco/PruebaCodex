@@ -8,7 +8,7 @@ import useIndiceData from './hooks/useIndiceData';
 import createColorScale from './utils/colorScale.js';
 
 function App() {
-  const { records, years, sizeOptions, getFiltered, domain } = useIndiceData();
+  const { records, years, sizeOptions, getFiltered } = useIndiceData();
   const minYear = years[0];
   const maxYear = years[years.length - 1];
   const [from, setFrom] = useState(minYear);
@@ -29,8 +29,8 @@ function App() {
     () => getFiltered({ from, to, size }),
     [getFiltered, from, to, size]
   );
-
-  const colorDomain = domain(filtered);
+  const vals = filtered.map(d => d.valor);
+  const colorDomain = vals.length ? [Math.min(...vals), Math.max(...vals)] : [0, 1];
   const colorScale = useMemo(
     () => (colorDomain ? createColorScale(colorDomain) : null),
     [colorDomain]
@@ -45,6 +45,7 @@ function App() {
       <div className="controls">
         <label>Tamaño:</label>
         <select value={size} onChange={e => setSize(e.target.value)}>
+          <option value="Total">Total</option>
           {sizeOptions.map(o => (
             <option key={o}>{o}</option>
           ))}
@@ -82,7 +83,7 @@ function App() {
           />
         </div>
         <div
-          className="card"
+          className="card map"
           style={{ gridColumn: '1 / span 2' }}
           role="region"
           aria-label="Mapa de alquileres por provincia"
