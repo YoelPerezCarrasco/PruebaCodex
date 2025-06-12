@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { Range } from 'react-range';
 
 import Map from './components/Map';
 import Legend from './components/Legend';
@@ -14,6 +15,51 @@ function App() {
   const [from, setFrom] = useState(minYear);
   const [to, setTo] = useState(maxYear);
   const [size, setSize] = useState('Total');
+
+  const STEP = 1;
+  const MIN = minYear;
+  const MAX = maxYear;
+
+  function YearRange({ values, onChange }) {
+    return (
+      <Range
+        values={values}
+        step={STEP}
+        min={MIN}
+        max={MAX}
+        onChange={onChange}
+        renderTrack={({ props, children }) => (
+          <div
+            {...props}
+            style={{
+              ...props.style,
+              height: '4px',
+              background: '#555',
+              margin: '0 0.5rem',
+            }}
+          >
+            {children}
+          </div>
+        )}
+        renderThumb={({ props }) => (
+          <div
+            {...props}
+            aria-valuemin={MIN}
+            aria-valuemax={MAX}
+            aria-valuenow={values[props.key]}
+            style={{
+              ...props.style,
+              height: '16px',
+              width: '16px',
+              borderRadius: '50%',
+              backgroundColor: '#90caf9',
+              outline: 'none',
+            }}
+          />
+        )}
+      />
+    );
+  }
 
   useEffect(() => {
     if (years.length) {
@@ -51,30 +97,21 @@ function App() {
           ))}
         </select>
         <label>Años:</label>
-        <input
-          type="range"
-          min={minYear}
-          max={maxYear}
-          value={from}
-          onChange={e => setFrom(+e.target.value)}
-          aria-label="Desde"
+        <YearRange
+          values={[from, to]}
+          onChange={([f, t]) => {
+            setFrom(f);
+            setTo(t);
+          }}
         />
-        <input
-          type="range"
-          min={minYear}
-          max={maxYear}
-          value={to}
-          onChange={e => setTo(+e.target.value)}
-          aria-label="Hasta"
-        />
-        <span>{from}-{to}</span>
+        <span>{from} – {to}</span>
       </div>
 
       <div className="grid-dash">
-        <div className="card" role="region" aria-label="Leyenda de colores" key="legend">
+        <div className="card legend" role="region" aria-label="Leyenda de colores" key="legend">
           <Legend scale={colorScale} />
         </div>
-        <div className="card" role="region" aria-label="Treemap por comunidad" key="treemap">
+        <div className="card treemap" role="region" aria-label="Treemap por comunidad" key="treemap">
           <Treemap
             filtered={filtered}
             selectedCca={selectedCca}
@@ -84,7 +121,6 @@ function App() {
         </div>
         <div
           className="card map"
-          style={{ gridColumn: '1 / span 2' }}
           role="region"
           aria-label="Mapa de alquileres por provincia"
           key="map"
