@@ -8,6 +8,8 @@ Los datos provienen del fichero "Índices provinciales: general y por tamaño de
 
 Los nombres de provincia se obtienen a partir de su código INE.
 
+Los CSV se sirven desde `/public`; Vite los copia tal cual a producción.
+
 ```bash
 npm i
 npm run dev

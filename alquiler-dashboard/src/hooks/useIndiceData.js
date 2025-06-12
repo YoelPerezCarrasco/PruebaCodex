@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { dsvFormat } from 'd3-dsv';
+import csvRaw from '../../public/indices_provinciales.csv?raw';
 
-const DATA_URL = '/src/data/indices_provinciales.csv';
 const BASE_URL = '/src/data/alquiler_base_2015.csv';
 
 export default function useIndiceData() {
@@ -10,9 +10,8 @@ export default function useIndiceData() {
 
   useEffect(() => {
     async function load() {
-      const csv = await fetch(DATA_URL).then(r => r.text());
       const parse = dsvFormat(';').parse;
-      const data = parse(csv, row => {
+      const data = parse(csvRaw, row => {
         const m = row.Provincias.match(/^\d{2}/);
         if (!m) return;
         const valor = +row.Total.replace(',', '.');
