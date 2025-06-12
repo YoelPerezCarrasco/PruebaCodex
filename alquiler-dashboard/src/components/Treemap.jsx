@@ -1,3 +1,4 @@
+/* ───── Tarjeta Treemap: distribución superficie por CCAA ───── */
 import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { hierarchy, treemap } from 'd3-hierarchy';

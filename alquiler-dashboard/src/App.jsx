@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Range } from 'react-range';
+
+import Landing from './components/Landing';
 
 import Map from './components/Map';
 import Legend from './components/Legend';
@@ -14,71 +15,22 @@ import provinceNames from './utils/provinceNames.js';
 import provToCca from './utils/provToCca.js';
 
 function App() {
-  const { records, years, getByYear } = useAlquilerEuros();
+  const [showDash, setShowDash] = useState(false);
+  const { records, years } = useAlquilerEuros();
   const { records: indiceRecords } = useIndiceData();
-  const minYear = years[0];
-  const maxYear = years[years.length - 1];
-  const [from, setFrom] = useState(null);
-  const [to, setTo] = useState(null);
-
-  const STEP = 1;
-  const MIN = minYear;
-  const MAX = maxYear;
-
-  function YearRange({ values, onChange }) {
-    const [from, to] = values;
-    const THUMB = {
-      height: '20px',
-      width: '20px',
-      borderRadius: '50%',
-      background: '#ff9800',
-      border: '2px solid #fff',
-      boxShadow: '0 0 2px #000',
-    };
-
-    return (
-      <div>
-        <Range
-          values={values}
-          step={STEP}
-          min={MIN}
-          max={MAX}
-          onChange={onChange}
-          renderTrack={({ props, children }) => (
-            <div {...props} style={{ ...props.style, height: '6px', background: '#555' }}>
-              {children}
-            </div>
-          )}
-          allowOverlap={false}
-          renderThumb={({ props, index }) => {
-            const { key: thumbKey, ...rest } = props;
-            return (
-              <div
-                key={thumbKey ?? index}
-                {...rest}
-                style={{ ...rest.style, ...THUMB }}
-              />
-            );
-          }}
-        />
-        <div style={{ textAlign: 'center', marginTop: 4 }}>{from} – {to}</div>
-      </div>
-    );
-  }
+  const [year, setYear] = useState();
 
   useEffect(() => {
-    if (years.length && from == null && to == null) {
-      setFrom(years[0]);
-      setTo(years.at(-1));
-    }
-  }, [years, from, to]);
+    if (years.length && year == null) setYear(years.at(-1));
+  }, [years, year]);
+
 
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [selectedCca, setSelectedCca] = useState(null);
 
   const filtered = useMemo(
-    () => (from != null && to != null ? getByYear(from, to) : []),
-    [getByYear, from, to]
+    () => (year != null ? records.filter(d => d.anio === year) : []),
+    [records, year]
   );
 
   const baseData = useMemo(
@@ -96,8 +48,7 @@ function App() {
   );
 
   const lineData = baseData.map(d => d.euros_m2);
-  const yearMid =
-    from != null && to != null ? Math.round((from + to) / 2) : null;
+  const yearMid = year;
   const scatterPts = useMemo(() => {
     if (!indiceRecords.length || yearMid == null) return [];
     return indiceRecords
@@ -112,41 +63,22 @@ function App() {
         euros: d.euros,
         indice: d.valor,
       }));
-  }, [indiceRecords, yearMid, selectedCca]);
+  }, [indiceRecords, year, selectedCca]);
+
+  if (!showDash) return <Landing onEnter={() => setShowDash(true)} />;
 
 
   if (!records.length) return <p>Cargando datos…</p>;
 
-
   return (
-    <div>
-      <h1>Dashboard de alquileres</h1>
-      <div className="controls">
-        <label>Años:</label>
-          {from != null && to != null && (
-            <YearRange
-              values={[from, to]}
-              onChange={([a, b]) => {
-                setFrom(a);
-                setTo(b);
-              }}
-            />
-          )}
-        <button onClick={() => setSelectedCca(null)} disabled={!selectedCca} style={{marginLeft:'1rem'}}>
-          Reset CCAA
-        </button>
-      </div>
-
-      <div className="grid-dash">
-        <div className="card treemap" role="region" aria-label="Treemap por comunidad" key="treemap" onClick={() => setSelectedCca(null)}>
-          <Treemap
-            filtered={filtered}
-            selectedCca={selectedCca}
-            onSelect={setSelectedCca}
-            colorDomain={colorDomain}
-          />
-        </div>
-        <div className="card map" role="region" aria-label="Mapa de alquileres por provincia" key="map">
+    <div className="dashboard-wrap">
+      {/* Fila 1 */}
+      <div className="dashboard-row">
+        <div
+          className="card map"
+          role="region"
+          aria-label="Mapa de alquileres por provincia"
+        >
           <Map
             filtered={filtered}
             colorScaleDomain={colorDomain}
@@ -154,18 +86,57 @@ function App() {
             selectedCca={selectedCca}
           />
         </div>
-        <div className="card scatter" key="scatter">
+      </div>
+
+      {/* Slider 1 thumb centrado bajo mapa */}
+      {year != null && (
+        <input
+          type="range"
+          min={years[0]}
+          max={years.at(-1)}
+          value={year}
+          onChange={e => setYear(+e.target.value)}
+          className="w-full accent-emerald-500 mt-2"
+        />
+      )}
+      <div className="text-center mt-1">{year}</div>
+      <button
+        onClick={() => setSelectedCca(null)}
+        disabled={!selectedCca}
+        className="btn mt-2"
+      >
+        Reset CCAA
+      </button>
+
+      {/* Leyenda centrada */}
+      <div className="card legend">
+        <Legend scale={colorScale} />
+      </div>
+
+      {/* Fila 2 */}
+      <div className="dashboard-row">
+        <div
+          className="card treemap"
+          role="region"
+          aria-label="Treemap por comunidad"
+          onClick={() => setSelectedCca(null)}
+        >
+          <Treemap
+            filtered={filtered}
+            selectedCca={selectedCca}
+            onSelect={setSelectedCca}
+            colorDomain={colorDomain}
+          />
+        </div>
+        <div className="card scatter">
           <Scatter points={scatterPts} selectedCca={selectedCca} />
         </div>
-        <div className="card line" key="line">
+        <div className="card line">
           <DensityLine data={lineData} />
-        </div>
-        <div className="card legend" role="region" aria-label="Leyenda de colores" key="legend">
-          <Legend scale={colorScale} />
         </div>
       </div>
       {provinciaSel && (
-        <footer>Provincia seleccionada: {provinciaSel}</footer>
+        <footer className="mt-2">Provincia seleccionada: {provinciaSel}</footer>
       )}
     </div>
   );
