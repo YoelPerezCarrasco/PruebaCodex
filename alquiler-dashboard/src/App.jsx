@@ -71,72 +71,67 @@ function App() {
   if (!records.length) return <p>Cargando datos…</p>;
 
   return (
-    <div className="dashboard-wrap">
-      {/* Fila 1 */}
-      <div className="dashboard-row">
-        <div
-          className="card map"
-          role="region"
-          aria-label="Mapa de alquileres por provincia"
-        >
-          <Map
-            filtered={filtered}
-            colorScaleDomain={colorDomain}
-            onSelect={setProvinciaSel}
-            selectedCca={selectedCca}
-          />
-        </div>
+    <div className="dashboard-grid">
+      {/* Línea de densidad arriba */}
+      <div className="card line">
+        {/* Muestra la distribución de €/m² en el año seleccionado */}
+        <DensityLine data={lineData} />
       </div>
 
-      {/* Slider 1 thumb centrado bajo mapa */}
-      {year != null && (
-        <input
-          type="range"
-          min={years[0]}
-          max={years.at(-1)}
-          value={year}
-          onChange={e => setYear(+e.target.value)}
-          className="w-full accent-emerald-500 mt-2"
+      {/* Treemap a la izquierda */}
+      <div className="card treemap" role="region" aria-label="Treemap por comunidad" onClick={() => setSelectedCca(null)}>
+        {/* Proporción de CCAA por superficie/alquiler */}
+        <Treemap
+          filtered={filtered}
+          selectedCca={selectedCca}
+          onSelect={setSelectedCca}
+          colorDomain={colorDomain}
         />
-      )}
-      <div className="text-center mt-1">{year}</div>
-      <button
-        onClick={() => setSelectedCca(null)}
-        disabled={!selectedCca}
-        className="btn mt-2"
-      >
-        Reset CCAA
-      </button>
+      </div>
 
-      {/* Leyenda centrada */}
+      {/* Mapa en el centro */}
+      <div className="card map" role="region" aria-label="Mapa de alquileres por provincia">
+        <Map
+          filtered={filtered}
+          colorScaleDomain={colorDomain}
+          onSelect={setProvinciaSel}
+          selectedCca={selectedCca}
+        />
+
+        {/* Selector de año bajo el mapa */}
+        {year != null && (
+          <input
+            type="range"
+            min={years[0]}
+            max={years.at(-1)}
+            value={year}
+            onChange={e => setYear(+e.target.value)}
+            className="w-full accent-emerald-500 mt-2"
+          />
+        )}
+        <div className="text-center mt-1">{year}</div>
+        <button
+          onClick={() => setSelectedCca(null)}
+          disabled={!selectedCca}
+          className="btn mt-2"
+        >
+          Reset CCAA
+        </button>
+      </div>
+
+      {/* Scatter a la derecha */}
+      <div className="card scatter">
+        {/* €/m² vs índice en el año seleccionado */}
+        <Scatter points={scatterPts} selectedCca={selectedCca} />
+      </div>
+
+      {/* Leyenda ocupa toda la fila inferior */}
       <div className="card legend">
         <Legend scale={colorScale} />
       </div>
 
-      {/* Fila 2 */}
-      <div className="dashboard-row">
-        <div
-          className="card treemap"
-          role="region"
-          aria-label="Treemap por comunidad"
-          onClick={() => setSelectedCca(null)}
-        >
-          <Treemap
-            filtered={filtered}
-            selectedCca={selectedCca}
-            onSelect={setSelectedCca}
-            colorDomain={colorDomain}
-          />
-        </div>
-        <div className="card scatter">
-          <Scatter points={scatterPts} selectedCca={selectedCca} />
-        </div>
-        <div className="card line">
-          <DensityLine data={lineData} />
-        </div>
-      </div>
       {provinciaSel && (
-        <footer className="mt-2">Provincia seleccionada: {provinciaSel}</footer>
+        <footer className="mt-2 col-span-full text-center">Provincia seleccionada: {provinciaSel}</footer>
       )}
     </div>
   );
