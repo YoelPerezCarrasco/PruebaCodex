@@ -5,23 +5,25 @@ function Histogram({ data }) {
   const ref = useRef();
 
   useEffect(() => {
-    if (data.length === 0) {
-      d3.select(ref.current).selectAll('*').remove();
-      d3.select(ref.current)
-        .append('text')
-        .attr('x', 160)
-        .attr('y', 80)
-        .attr('text-anchor', 'middle')
-        .attr('fill', '#777')
-        .text('Sin datos');
-      return;
-    }
     const width = 320;
     const height = 160;
     const svg = d3
       .select(ref.current)
       .attr('width', width)
       .attr('height', height);
+
+    svg.selectAll('*').remove();
+
+    if (data.length === 0) {
+      svg
+        .append('text')
+        .attr('x', width / 2)
+        .attr('y', height / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#777')
+        .text('Sin datos');
+      return () => svg.selectAll('*').remove();
+    }
 
     const x = d3
       .scaleLinear()
@@ -34,8 +36,6 @@ function Histogram({ data }) {
       .scaleLinear()
       .domain([0, d3.max(bins, d => d.length)])
       .range([height - 20, 10]);
-
-    svg.selectAll('*').remove();
 
     svg
       .append('g')
@@ -52,6 +52,8 @@ function Histogram({ data }) {
       .append('g')
       .attr('transform', `translate(0,${height - 20})`)
       .call(d3.axisBottom(x).ticks(5));
+
+    return () => svg.selectAll('*').remove();
   }, [data]);
 
   return <svg ref={ref} role="img" aria-label="Histograma €/m²" />;

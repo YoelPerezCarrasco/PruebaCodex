@@ -5,13 +5,24 @@ function Scatter({ points, selectedCca }) {
   const ref = useRef();
 
   useEffect(() => {
-    if (!points.length) {
-      d3.select(ref.current).selectAll('*').remove();
-      return;
-    }
     const w = 320;
     const h = 200;
     const p = 30;
+
+    const svg = d3.select(ref.current).attr('width', w).attr('height', h);
+
+    svg.selectAll('*').remove();
+
+    if (!points.length) {
+      svg
+        .append('text')
+        .attr('x', w / 2)
+        .attr('y', h / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#777')
+        .text('Sin datos');
+      return () => svg.selectAll('*').remove();
+    }
 
     const x = d3
       .scaleLinear()
@@ -25,8 +36,6 @@ function Scatter({ points, selectedCca }) {
       .nice()
       .range([h - p, p]);
 
-    const svg = d3.select(ref.current).attr('width', w).attr('height', h);
-    svg.selectAll('*').remove();
 
     svg
       .append('g')
@@ -50,17 +59,11 @@ function Scatter({ points, selectedCca }) {
       .attr('fill', fill)
       .append('title')
       .text(d => `${d.prov}: ${d.euros.toFixed(2)} €/m²`);
+
+    return () => svg.selectAll('*').remove();
   }, [points, selectedCca]);
 
-  return (
-    <svg ref={ref} role="img" aria-label="Scatter €/m² vs índice">
-      {points.length === 0 && (
-        <text x="50%" y="50%" textAnchor="middle" fill="#777">
-          Sin datos
-        </text>
-      )}
-    </svg>
-  );
+  return <svg ref={ref} role="img" aria-label="Scatter €/m² vs índice" />;
 }
 
 export default Scatter;

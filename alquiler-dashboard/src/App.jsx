@@ -50,9 +50,16 @@ function App() {
             </div>
           )}
           allowOverlap={false}
-          renderThumb={({ key, props }) => (
-            <div key={key} {...props} style={{ ...props.style, ...THUMB }} />
-          )}
+          renderThumb={({ props, index }) => {
+            const { key: thumbKey, ...rest } = props;
+            return (
+              <div
+                key={thumbKey ?? index}
+                {...rest}
+                style={{ ...rest.style, ...THUMB }}
+              />
+            );
+          }}
         />
         <div style={{ textAlign: 'center', marginTop: 4 }}>{from} – {to}</div>
       </div>
@@ -119,8 +126,7 @@ function App() {
           {from != null && to != null && (
             <YearRange
               values={[from, to]}
-              onChange={v => {
-                const [a, b] = v;
+              onChange={([a, b]) => {
                 setFrom(a);
                 setTo(b);
               }}
