@@ -1,7 +1,37 @@
-.dashboard-wrap   { @apply flex flex-col items-center gap-4 max-w-screen-xl mx-auto px-4 pb-8; }
-.dashboard-row    { @apply flex flex-wrap justify-center gap-4 w-full; }
-.dashboard-row>*  { flex: 1 1 320px; }
-.card.map         { flex: 1 1 600px; min-height: 520px; }
-.card.legend      { @apply w-full flex justify-center; }
+.dashboard-grid {
+  display: grid;
+  grid-template-areas:
+    "line   line    line"
+    "tree   map     scat"
+    "legend legend  legend";
+  grid-template-columns: 320px 1fr 340px;    /* izq, centro, dcha */
+  grid-template-rows:   160px auto  90px;    /* arriba, centro, abajo */
+  gap: 1rem;
+  max-width: 1400px;       /* no sobrepasar pantallas muy anchas */
+  margin: 0 auto;          /* centrado */
+  padding: 1rem;
+}
+
+.card.map    { grid-area: map;    min-height: 550px; }
+.card.line   { grid-area: line;   }
+.card.treemap{ grid-area: tree;   }
+.card.scatter{ grid-area: scat;   }
+.card.legend { grid-area: legend; display:flex; justify-content:center; align-items:center; }
+
 #tooltip { background: rgba(0,0,0,.8) !important; border: none !important; color: #fff !important; }
 .card.map svg { width: 100%; height: 100%; }
+
+@media (max-width: 900px) {
+  /* Apilar en móvil */
+  .dashboard-grid {
+    grid-template-areas:
+      "map"
+      "line"
+      "tree"
+      "scat"
+      "legend";
+    grid-template-columns: 1fr;
+    grid-template-rows:   auto;
+  }
+  .card { min-width: 0; }
+}
