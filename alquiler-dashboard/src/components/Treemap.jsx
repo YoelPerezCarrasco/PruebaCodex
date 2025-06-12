@@ -25,11 +25,23 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
     treemap().size([300, 300]).padding(1)(root);
 
     const svg = d3.select(ref.current);
-    const sel = svg.selectAll('rect.tile').data(root.leaves(), d => d.data.cca);
+    const sel = svg.selectAll('g.tile').data(root.leaves(), d => d.data.cca);
 
-    sel
-      .join('rect')
+    const g = sel
+      .join('g')
       .classed('tile', true)
+      .style('cursor', 'pointer')
+      .on('click', (e, d) => {
+        if (!onSelect) return;
+        if (selectedCca === d.data.cca) onSelect(null);
+        else onSelect(d.data.cca);
+        e.stopPropagation();
+      });
+
+    g
+      .selectAll('rect')
+      .data(d => [d])
+      .join('rect')
       .attr('x', d => d.x0)
       .attr('y', d => d.y0)
       .attr('width', d => d.x1 - d.x0)
@@ -38,13 +50,22 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       .attr('stroke', '#222')
       .style('opacity', d =>
         selectedCca && d.data.cca !== selectedCca ? 0.3 : 1
-      )
-      .on('click', (e, d) => {
-        if (!onSelect) return;
-        if (selectedCca === d.data.cca) onSelect(null);
-        else onSelect(d.data.cca);
-        e.stopPropagation();
-      })
+      );
+
+    g
+      .selectAll('text')
+      .data(d => [d])
+      .join('text')
+      .text(d => d.data.cca)
+      .attr('x', d => (d.x0 + d.x1) / 2)
+      .attr('y', d => (d.y0 + d.y1) / 2)
+      .attr('fill', '#fff')
+      .attr('font-size', '10px')
+      .attr('pointer-events', 'none')
+      .attr('text-anchor', 'middle')
+      .style('display', d => (d.x1 - d.x0) < 40 ? 'none' : null);
+
+    g
       .selectAll('title')
       .data(d => [d])
       .join('title')

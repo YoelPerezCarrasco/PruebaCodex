@@ -104,8 +104,8 @@ function App() {
             <YearRange
               values={[from, to]}
               onChange={([f, t]) => {
-                setFrom(Math.min(f, t));
-                setTo(Math.max(f, t));
+                setFrom(f);
+                setTo(t);
               }}
             />
           )}

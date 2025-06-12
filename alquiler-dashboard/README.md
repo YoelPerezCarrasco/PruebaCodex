@@ -32,3 +32,4 @@ La interfaz usa un *dashboard* oscuro con tarjetas y cuadrícula CSS Grid.
 ![Captura del nuevo diseño](TODO)
 
 Nuevo selector de años con doble asa, mapa anclado a la derecha.
+Leyenda muestra €/m² y treemap etiqueta CCAA.
