@@ -18,7 +18,7 @@ npm run dev
 
 ## Controles
 
-Puedes escoger el **tamaño de la vivienda** con un desplegable y filtrar los datos por un **rango de años** usando dos deslizadores. El intervalo seleccionado aparece junto a los controles.
+Puedes escoger el **tamaño de la vivienda** con un desplegable y filtrar los datos por un **rango de años** mediante un deslizador de rango doble. El intervalo seleccionado aparece junto a los controles.
 
 ## Vista agregada por CCAA
 
@@ -30,3 +30,5 @@ las provincias que no pertenecen a la comunidad seleccionada.
 
 La interfaz usa un *dashboard* oscuro con tarjetas y cuadrícula CSS Grid.
 ![Captura del nuevo diseño](TODO)
+
+Nuevo selector de años con doble asa, mapa anclado a la derecha.
