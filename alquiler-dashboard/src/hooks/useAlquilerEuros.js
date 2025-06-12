@@ -30,10 +30,15 @@ export default function useAlquilerEuros() {
     [records]
   );
 
+  const getByYear = useCallback(
+    (from, to) => records.filter(r => r.anio >= from && r.anio <= to),
+    [records]
+  );
+
   const domain = useCallback(filtered => {
     const vals = filtered.map(d => d.euros_m2).filter(v => !Number.isNaN(v));
     return d3.extent(vals);
   }, []);
 
-  return { records, years, getFiltered, domain };
+  return { records, years, getFiltered, getByYear, domain };
 }

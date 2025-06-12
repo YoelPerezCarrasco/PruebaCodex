@@ -12,12 +12,10 @@ import createColorScale from './utils/colorScale.js';
 import provToCca from './utils/provToCca.js';
 
 function App() {
-  const { records, years, getFiltered } = useAlquilerEuros();
+  const { records, years, getByYear } = useAlquilerEuros();
   const minYear = years[0];
   const maxYear = years[years.length - 1];
-  const [from, setFrom] = useState();
-  const [to, setTo] = useState();
-  const [yearsReady, setYearsReady] = useState(false);
+  const [range, setRange] = useState([]);
 
   const STEP = 1;
   const MIN = minYear;
@@ -45,32 +43,25 @@ function App() {
           </div>
         )}
         allowOverlap={false}
-        renderThumb={({ key, props, index }) => (
-          <div
-            key={key}
-            {...props}
-            style={{ ...props.style, outline: 'none' }}
-            aria-label={index === 0 ? 'Desde' : 'Hasta'}
-          />
+        renderThumb={({ key, props }) => (
+          <div key={key} {...props} style={{ ...props.style, outline: 'none' }} />
         )}
       />
     );
   }
 
   useEffect(() => {
-    if (years.length && !yearsReady) {
-      setFrom(years[0]);
-      setTo(years.at(-1));
-      setYearsReady(true);
+    if (years.length && !range.length) {
+      setRange([years[0], years.at(-1)]);
     }
-  }, [years, yearsReady]);
+  }, [years]);
 
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [selectedCca, setSelectedCca] = useState(null);
 
   const filtered = useMemo(
-    () => getFiltered({ from, to }),
-    [getFiltered, from, to]
+    () => getByYear(range[0], range[1]),
+    [getByYear, range]
   );
   const vals = filtered.map(d => d.euros_m2);
   const colorDomain = vals.length ? [Math.min(...vals), Math.max(...vals)] : [0, 1];
@@ -100,16 +91,13 @@ function App() {
       <h1>Dashboard de alquileres</h1>
       <div className="controls">
         <label>Años:</label>
-          {yearsReady && (
+          {range.length && (
             <YearRange
-              values={[from, to]}
-              onChange={([f, t]) => {
-                setFrom(f);
-                setTo(t);
-              }}
+              values={range}
+              onChange={v => setRange([Math.min(...v), Math.max(...v)])}
             />
           )}
-        {yearsReady && <span>{from} – {to}</span>}
+        {range.length && <span>{range[0]} – {range[1]}</span>}
       </div>
 
       <div className="grid-dash">
