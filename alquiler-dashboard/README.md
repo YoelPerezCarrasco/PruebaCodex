@@ -36,3 +36,4 @@ Leyenda muestra €/m² y treemap etiqueta CCAA.
 
 Las visualizaciones usan D3 en React.
 No se emplea Vega/Altair; migrar un gráfico a Vega-Lite (p.ej. con react-vega) sería una mejora futura.
+Reemplazado Headless UI por un componente Tabs propio para evitar conflicto de peer-dependencies con React 19.
