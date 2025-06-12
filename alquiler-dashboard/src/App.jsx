@@ -14,6 +14,7 @@ function App() {
   const maxYear = years[years.length - 1];
   const [from, setFrom] = useState();
   const [to, setTo] = useState();
+  const [yearsReady, setYearsReady] = useState(false);
 
   const STEP = 1;
   const MIN = minYear;
@@ -40,21 +41,13 @@ function App() {
             {children}
           </div>
         )}
-        renderThumb={({ key, props }) => (
+        allowOverlap={false}
+        renderThumb={({ key, props, index }) => (
           <div
             key={key}
             {...props}
-            aria-valuemin={MIN}
-            aria-valuemax={MAX}
-            aria-valuenow={values[key]}
-            style={{
-              ...props.style,
-              height: '16px',
-              width: '16px',
-              borderRadius: '50%',
-              backgroundColor: '#90caf9',
-              outline: 'none',
-            }}
+            style={{ ...props.style, outline: 'none' }}
+            aria-label={index === 0 ? 'Desde' : 'Hasta'}
           />
         )}
       />
@@ -62,11 +55,12 @@ function App() {
   }
 
   useEffect(() => {
-    if (years.length) {
+    if (years.length && !yearsReady) {
       setFrom(years[0]);
       setTo(years.at(-1));
+      setYearsReady(true);
     }
-  }, [years]);
+  }, [years, yearsReady]);
 
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [selectedCca, setSelectedCca] = useState(null);
@@ -90,16 +84,16 @@ function App() {
       <h1>Dashboard de alquileres</h1>
       <div className="controls">
         <label>Años:</label>
-        {from != null && to != null && (
-          <YearRange
-            values={[from, to]}
-            onChange={([f, t]) => {
-              setFrom(f);
-              setTo(t);
-            }}
-          />
-        )}
-        <span>{from} – {to}</span>
+          {yearsReady && (
+            <YearRange
+              values={[from, to]}
+              onChange={([f, t]) => {
+                setFrom(Math.min(f, t));
+                setTo(Math.max(f, t));
+              }}
+            />
+          )}
+        {yearsReady && <span>{from} – {to}</span>}
       </div>
 
       <div className="grid-dash">
