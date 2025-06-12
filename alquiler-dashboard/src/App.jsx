@@ -6,8 +6,6 @@ import Map from './components/Map';
 import Header from './components/Header';
 import Treemap from './components/Treemap';
 import TabsPanel from './components/TabsPanel';
-import Scatter from './components/Scatter';
-import DensityLine from './components/DensityLine';
 import './styles/dashboard.css';
 import useAlquilerEuros from './hooks/useAlquilerEuros';
 import useIndiceData from './hooks/useIndiceData';
