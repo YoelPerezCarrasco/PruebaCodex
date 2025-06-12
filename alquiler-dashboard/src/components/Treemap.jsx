@@ -25,18 +25,26 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
     treemap().size([300, 300]).padding(1)(root);
 
     const svg = d3.select(ref.current);
-    const sel = svg.selectAll('rect').data(root.leaves(), d => d.data.cca);
+    const sel = svg.selectAll('rect.tile').data(root.leaves(), d => d.data.cca);
 
     sel
       .join('rect')
+      .classed('tile', true)
       .attr('x', d => d.x0)
       .attr('y', d => d.y0)
       .attr('width', d => d.x1 - d.x0)
       .attr('height', d => d.y1 - d.y0)
       .attr('fill', d => scale(d.data.euros_m2))
       .attr('stroke', '#222')
-      .style('opacity', d => (selectedCca && d.data.cca !== selectedCca ? 0.3 : 1))
-      .on('click', (e, d) => onSelect && onSelect(d.data.cca))
+      .style('opacity', d =>
+        selectedCca && d.data.cca !== selectedCca ? 0.3 : 1
+      )
+      .on('click', (e, d) => {
+        if (!onSelect) return;
+        if (selectedCca === d.data.cca) onSelect(null);
+        else onSelect(d.data.cca);
+        e.stopPropagation();
+      })
       .selectAll('title')
       .data(d => [d])
       .join('title')
@@ -56,6 +64,12 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       role="img"
       aria-label="Treemap alquiler por CCAA"
     >
+      <rect
+        width="100%"
+        height="100%"
+        fill="transparent"
+        onClick={() => onSelect && onSelect(null)}
+      />
       {filtered.length === 0 && (
         <text x="50%" y="50%" textAnchor="middle" fill="#777">
           Sin datos para los filtros actuales
