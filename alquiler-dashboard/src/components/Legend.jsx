@@ -3,24 +3,21 @@ export default function Legend({ scale }) {
     const rects = scale.range();
     const max = scale.invertExtent(rects[rects.length - 1])[1];
 
-    const width = 220;
     const pad = 6;
     const step = 30;
 
     return (
       <svg
-        width={width}
-        height={40}
+        width="100%"
+        height={60}
         aria-label="leyenda"
         role="img"
         style={{ border: '1px solid #444', background: '#1e1e1e' }}
       >
         <g transform={`translate(${pad},${pad})`}>
           <text
-            x={(width - pad * 2) / 2}
-            y={0}
-            dy="0.8em"
-            fontSize={10}
+            x="50%"
+            y={14}
             textAnchor="middle"
             fill="#fff"
           >

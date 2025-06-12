@@ -4,7 +4,7 @@ import { Range } from 'react-range';
 import Map from './components/Map';
 import Legend from './components/Legend';
 import Treemap from './components/Treemap';
-import Histogram from './components/Histogram';
+import DensityLine from './components/DensityLine';
 import Scatter from './components/Scatter';
 import './styles/dashboard.css';
 import useAlquilerEuros from './hooks/useAlquilerEuros';
@@ -95,7 +95,7 @@ function App() {
     [colorDomain]
   );
 
-  const histoData = baseData.map(d => d.euros_m2);
+  const lineData = baseData.map(d => d.euros_m2);
   const yearMid =
     from != null && to != null ? Math.round((from + to) / 2) : null;
   const scatterPts = useMemo(() => {
@@ -132,22 +132,13 @@ function App() {
               }}
             />
           )}
+        <button onClick={() => setSelectedCca(null)} disabled={!selectedCca} style={{marginLeft:'1rem'}}>
+          Reset CCAA
+        </button>
       </div>
 
       <div className="grid-dash">
-        <div className="card legend" role="region" aria-label="Leyenda de colores" key="legend">
-          <Legend scale={colorScale} />
-        </div>
-        <button onClick={() => setSelectedCca(null)} disabled={!selectedCca}>
-          Reset CCAA
-        </button>
-        <div
-          className="card treemap"
-          role="region"
-          aria-label="Treemap por comunidad"
-          key="treemap"
-          onClick={() => setSelectedCca(null)}
-        >
+        <div className="card treemap" role="region" aria-label="Treemap por comunidad" key="treemap" onClick={() => setSelectedCca(null)}>
           <Treemap
             filtered={filtered}
             selectedCca={selectedCca}
@@ -155,24 +146,22 @@ function App() {
             colorDomain={colorDomain}
           />
         </div>
-        <div className="card histo" key="histo">
-          <Histogram data={histoData} />
-        </div>
-        <div className="card scatter" key="scatter">
-          <Scatter points={scatterPts} selectedCca={selectedCca} />
-        </div>
-        <div
-          className="card map"
-          role="region"
-          aria-label="Mapa de alquileres por provincia"
-          key="map"
-        >
+        <div className="card map" role="region" aria-label="Mapa de alquileres por provincia" key="map">
           <Map
             filtered={filtered}
             colorScaleDomain={colorDomain}
             onSelect={setProvinciaSel}
             selectedCca={selectedCca}
           />
+        </div>
+        <div className="card scatter" key="scatter">
+          <Scatter points={scatterPts} selectedCca={selectedCca} />
+        </div>
+        <div className="card line" key="line">
+          <DensityLine data={lineData} />
+        </div>
+        <div className="card legend" role="region" aria-label="Leyenda de colores" key="legend">
+          <Legend scale={colorScale} />
         </div>
       </div>
       {provinciaSel && (
