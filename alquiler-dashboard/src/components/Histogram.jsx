@@ -5,8 +5,15 @@ function Histogram({ data }) {
   const ref = useRef();
 
   useEffect(() => {
-    if (!data.length) {
+    if (data.length === 0) {
       d3.select(ref.current).selectAll('*').remove();
+      d3.select(ref.current)
+        .append('text')
+        .attr('x', 160)
+        .attr('y', 80)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#777')
+        .text('Sin datos');
       return;
     }
     const width = 320;
@@ -47,15 +54,7 @@ function Histogram({ data }) {
       .call(d3.axisBottom(x).ticks(5));
   }, [data]);
 
-  return (
-    <svg ref={ref} role="img" aria-label="Histograma €/m²">
-      {data.length === 0 && (
-        <text x="50%" y="50%" textAnchor="middle" fill="#777">
-          Sin datos
-        </text>
-      )}
-    </svg>
-  );
+  return <svg ref={ref} role="img" aria-label="Histograma €/m²" />;
 }
 
 export default Histogram;

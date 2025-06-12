@@ -18,7 +18,8 @@ function App() {
   const { records: indiceRecords } = useIndiceData();
   const minYear = years[0];
   const maxYear = years[years.length - 1];
-  const [range, setRange] = useState([]);
+  const [from, setFrom] = useState(null);
+  const [to, setTo] = useState(null);
 
   const STEP = 1;
   const MIN = minYear;
@@ -59,17 +60,18 @@ function App() {
   }
 
   useEffect(() => {
-    if (years.length && !range.length) {
-      setRange([years[0], years.at(-1)]);
+    if (years.length && from == null && to == null) {
+      setFrom(years[0]);
+      setTo(years.at(-1));
     }
-  }, [years]);
+  }, [years, from, to]);
 
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [selectedCca, setSelectedCca] = useState(null);
 
   const filtered = useMemo(
-    () => getByYear(range[0], range[1]),
-    [getByYear, range]
+    () => (from != null && to != null ? getByYear(from, to) : []),
+    [getByYear, from, to]
   );
 
   const baseData = useMemo(
@@ -87,7 +89,8 @@ function App() {
   );
 
   const histoData = baseData.map(d => d.euros_m2);
-  const yearMid = range.length ? Math.round((range[0] + range[1]) / 2) : null;
+  const yearMid =
+    from != null && to != null ? Math.round((from + to) / 2) : null;
   const scatterPts = useMemo(() => {
     if (!indiceRecords.length || yearMid == null) return [];
     return indiceRecords
@@ -113,10 +116,14 @@ function App() {
       <h1>Dashboard de alquileres</h1>
       <div className="controls">
         <label>Años:</label>
-          {range.length && (
+          {from != null && to != null && (
             <YearRange
-              values={range}
-              onChange={v => setRange([Math.min(...v), Math.max(...v)])}
+              values={[from, to]}
+              onChange={v => {
+                const [a, b] = v;
+                setFrom(a);
+                setTo(b);
+              }}
             />
           )}
       </div>
