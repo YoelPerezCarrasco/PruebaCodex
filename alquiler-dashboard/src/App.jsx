@@ -12,8 +12,8 @@ function App() {
   const { records, years, getFiltered } = useAlquilerEuros();
   const minYear = years[0];
   const maxYear = years[years.length - 1];
-  const [from, setFrom] = useState(minYear);
-  const [to, setTo] = useState(maxYear);
+  const [from, setFrom] = useState();
+  const [to, setTo] = useState();
 
   const STEP = 1;
   const MIN = minYear;
@@ -40,12 +40,13 @@ function App() {
             {children}
           </div>
         )}
-        renderThumb={({ props }) => (
+        renderThumb={({ key, props }) => (
           <div
+            key={key}
             {...props}
             aria-valuemin={MIN}
             aria-valuemax={MAX}
-            aria-valuenow={values[props.key]}
+            aria-valuenow={values[key]}
             style={{
               ...props.style,
               height: '16px',
@@ -62,10 +63,10 @@ function App() {
 
   useEffect(() => {
     if (years.length) {
-      setFrom(y => (y == null ? minYear : y));
-      setTo(t => (t == null ? maxYear : t));
+      setFrom(years[0]);
+      setTo(years.at(-1));
     }
-  }, [years, minYear, maxYear]);
+  }, [years]);
 
   const [provinciaSel, setProvinciaSel] = useState(null);
   const [selectedCca, setSelectedCca] = useState(null);
@@ -89,13 +90,15 @@ function App() {
       <h1>Dashboard de alquileres</h1>
       <div className="controls">
         <label>Años:</label>
-        <YearRange
-          values={[from, to]}
-          onChange={([f, t]) => {
-            setFrom(f);
-            setTo(t);
-          }}
-        />
+        {from != null && to != null && (
+          <YearRange
+            values={[from, to]}
+            onChange={([f, t]) => {
+              setFrom(f);
+              setTo(t);
+            }}
+          />
+        )}
         <span>{from} – {to}</span>
       </div>
 
