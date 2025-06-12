@@ -56,7 +56,13 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       height={300}
       role="img"
       aria-label="Treemap alquiler por CCAA"
-    />
+    >
+      {filtered.length === 0 && (
+        <text x="50%" y="50%" textAnchor="middle" fill="#777">
+          Sin datos para los filtros actuales
+        </text>
+      )}
+    </svg>
   );
 }
 

@@ -144,7 +144,13 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: DEFAULT_HEIGHT }}>
-      <svg ref={svgRef} width={DEFAULT_WIDTH} height={DEFAULT_HEIGHT} role="img" />
+      <svg ref={svgRef} width={DEFAULT_WIDTH} height={DEFAULT_HEIGHT} role="img">
+        {filtered.length === 0 && (
+          <text x="50%" y="50%" textAnchor="middle" fill="#777">
+            Sin datos para los filtros actuales
+          </text>
+        )}
+      </svg>
     </div>
   );
 }
