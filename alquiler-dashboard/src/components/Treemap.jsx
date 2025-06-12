@@ -41,14 +41,19 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       .selectAll('title')
       .data(d => [d])
       .join('title')
-      .text(
-        d =>
-          `${ccaNames[d.data.cca]}: ${d.data.alquiler
-            .toFixed(1)
-            .replace('.', ',')} - ${d.data.euros
-            ?.toFixed(0)
-            .replace('.', ',')} €`
-      );
+      .text(d => {
+        const v = d.data.alquiler;
+        const euros = d.data.euros;
+        const vText =
+          v != null && !Number.isNaN(v)
+            ? v.toFixed(1).replace('.', ',')
+            : 'sin dato';
+        const eText =
+          euros != null && !Number.isNaN(euros)
+            ? euros.toFixed(0).replace('.', ',')
+            : 'sin dato';
+        return `${ccaNames[d.data.cca]}: ${vText} - ${eText} €`;
+      });
   }, [filtered, selectedCca, colorDomain, onSelect]);
 
   return (
