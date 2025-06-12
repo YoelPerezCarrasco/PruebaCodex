@@ -46,14 +46,20 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
     [colorScaleDomain]
   );
 
-  const showTooltip = (id, val, event) => {
+  const showTooltip = (id, info, event) => {
     if (!tooltipRef.current) return;
     const name = provinceNames[id] || `Provincia ${id}`;
+    const indice = info?.indice;
+    const euros = info?.euros;
     tooltipRef.current
       .html(
         `<strong>${name}</strong><br/>Índice: ${
-          val != null && !Number.isNaN(val)
-            ? val.toFixed(1).replace('.', ',')
+          indice != null && !Number.isNaN(indice)
+            ? indice.toFixed(1).replace('.', ',')
+            : 'Sin dato'
+        }<br/>€: ${
+          euros != null && !Number.isNaN(euros)
+            ? euros.toFixed(0).replace('.', ',')
             : 'Sin dato'
         }`
       )
@@ -85,7 +91,10 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
 
     const values = d3.rollup(
       filtered.filter(d => d.valor != null && !Number.isNaN(d.valor)),
-      v => d3.mean(v, d => d.valor),
+      v => ({
+        indice: d3.mean(v, d => d.valor),
+        euros: d3.mean(v, d => d.euros),
+      }),
       d => d.cod_provincia
     );
 
@@ -104,8 +113,8 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
         if (onSelect) onSelect(d.id);
       })
       .on('mouseenter', (event, f) => {
-        const val = values.get(f.id);
-        showTooltip(f.id, val, event);
+        const info = values.get(f.id);
+        showTooltip(f.id, info, event);
       })
       .on('mouseleave', hideTooltip)
       .each(function (d) {
@@ -121,7 +130,7 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
       .duration(600)
       .attr('fill', d => {
         const val = values.get(d.id);
-        return val != null ? color(val) : '#ccc';
+        return val != null ? color(val.indice) : '#ccc';
       });
   }, [features, filtered, colorScale, onSelect, selectedCca]);
 
