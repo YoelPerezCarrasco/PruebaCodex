@@ -11,6 +11,7 @@ import useAlquilerEuros from './hooks/useAlquilerEuros';
 import useIndiceData from './hooks/useIndiceData';
 import createColorScale from './utils/colorScale.js';
 import provinceNames from './utils/provinceNames.js';
+import provToCca from './utils/provToCca.js';
 
 function App() {
   const { records, years, getByYear } = useAlquilerEuros();
@@ -24,31 +25,36 @@ function App() {
   const MAX = maxYear;
 
   function YearRange({ values, onChange }) {
+    const [from, to] = values;
+    const THUMB = {
+      height: '20px',
+      width: '20px',
+      borderRadius: '50%',
+      background: '#ff9800',
+      border: '2px solid #fff',
+      boxShadow: '0 0 2px #000',
+    };
+
     return (
-      <Range
-        values={values}
-        step={STEP}
-        min={MIN}
-        max={MAX}
-        onChange={onChange}
-        renderTrack={({ props, children }) => (
-          <div
-            {...props}
-            style={{
-              ...props.style,
-              height: '4px',
-              background: '#555',
-              margin: '0 0.5rem',
-            }}
-          >
-            {children}
-          </div>
-        )}
-        allowOverlap={false}
-        renderThumb={({ key, props }) => (
-          <div key={key} {...props} style={{ ...props.style, outline: 'none' }} />
-        )}
-      />
+      <div>
+        <Range
+          values={values}
+          step={STEP}
+          min={MIN}
+          max={MAX}
+          onChange={onChange}
+          renderTrack={({ props, children }) => (
+            <div {...props} style={{ ...props.style, height: '6px', background: '#555' }}>
+              {children}
+            </div>
+          )}
+          allowOverlap={false}
+          renderThumb={({ key, props }) => (
+            <div key={key} {...props} style={{ ...props.style, ...THUMB }} />
+          )}
+        />
+        <div style={{ textAlign: 'center', marginTop: 4 }}>{from} – {to}</div>
+      </div>
     );
   }
 
@@ -65,6 +71,14 @@ function App() {
     () => getByYear(range[0], range[1]),
     [getByYear, range]
   );
+
+  const baseData = useMemo(
+    () =>
+      selectedCca
+        ? filtered.filter(d => provToCca[d.cod_provincia] === selectedCca)
+        : filtered,
+    [filtered, selectedCca]
+  );
   const vals = filtered.map(d => d.euros_m2);
   const colorDomain = vals.length ? [Math.min(...vals), Math.max(...vals)] : [0, 1];
   const colorScale = useMemo(
@@ -72,18 +86,23 @@ function App() {
     [colorDomain]
   );
 
-  const histoData = filtered.map(d => d.euros_m2);
+  const histoData = baseData.map(d => d.euros_m2);
   const yearMid = range.length ? Math.round((range[0] + range[1]) / 2) : null;
   const scatterPts = useMemo(() => {
     if (!indiceRecords.length || yearMid == null) return [];
     return indiceRecords
-      .filter(d => d.anio === yearMid && d.tam === 'Total')
+      .filter(
+        d =>
+          d.anio === yearMid &&
+          d.tam === 'Total' &&
+          (!selectedCca || provToCca[d.cod_provincia] === selectedCca)
+      )
       .map(d => ({
         prov: provinceNames[d.cod_provincia] || d.cod_provincia,
         euros: d.euros,
         indice: d.valor,
       }));
-  }, [indiceRecords, yearMid]);
+  }, [indiceRecords, yearMid, selectedCca]);
 
 
   if (!records.length) return <p>Cargando datos…</p>;
@@ -100,7 +119,6 @@ function App() {
               onChange={v => setRange([Math.min(...v), Math.max(...v)])}
             />
           )}
-        {range.length && <span>{range[0]} – {range[1]}</span>}
       </div>
 
       <div className="grid-dash">
@@ -128,7 +146,7 @@ function App() {
           <Histogram data={histoData} />
         </div>
         <div className="card scatter" key="scatter">
-          <Scatter points={scatterPts} />
+          <Scatter points={scatterPts} selectedCca={selectedCca} />
         </div>
         <div
           className="card map"

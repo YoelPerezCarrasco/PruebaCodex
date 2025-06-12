@@ -5,6 +5,10 @@ function Histogram({ data }) {
   const ref = useRef();
 
   useEffect(() => {
+    if (!data.length) {
+      d3.select(ref.current).selectAll('*').remove();
+      return;
+    }
     const width = 320;
     const height = 160;
     const svg = d3
@@ -43,7 +47,15 @@ function Histogram({ data }) {
       .call(d3.axisBottom(x).ticks(5));
   }, [data]);
 
-  return <svg ref={ref} role="img" aria-label="Histograma €/m²" />;
+  return (
+    <svg ref={ref} role="img" aria-label="Histograma €/m²">
+      {data.length === 0 && (
+        <text x="50%" y="50%" textAnchor="middle" fill="#777">
+          Sin datos
+        </text>
+      )}
+    </svg>
+  );
 }
 
 export default Histogram;
