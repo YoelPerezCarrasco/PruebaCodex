@@ -16,6 +16,7 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
         filtered,
         v => ({
           alquiler: d3.mean(v, d => d.valor),
+          euros: d3.mean(v, d => d.euros),
           poblacion: v.length,
         }),
         d => provToCca[d.cod_provincia]
@@ -44,7 +45,9 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
         d =>
           `${ccaNames[d.data.cca]}: ${d.data.alquiler
             .toFixed(1)
-            .replace('.', ',')}`
+            .replace('.', ',')} - ${d.data.euros
+            ?.toFixed(0)
+            .replace('.', ',')} €`
       );
   }, [filtered, selectedCca, colorDomain, onSelect]);
 
