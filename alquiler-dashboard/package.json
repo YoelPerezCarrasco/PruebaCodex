@@ -19,7 +19,8 @@
     "react-dom": "^19.1.0",
     "react-range": "^1.10.0",
     "topojson-client": "^3.1.0",
-    "csv-parse": "^5.5.4"
+    "csv-parse": "^5.5.4",
+    "@headlessui/react": "^1.7.18"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
