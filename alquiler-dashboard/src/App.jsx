@@ -5,16 +5,15 @@ import Map from './components/Map';
 import Legend from './components/Legend';
 import Treemap from './components/Treemap';
 import './styles/dashboard.css';
-import useIndiceData from './hooks/useIndiceData';
+import useAlquilerEuros from './hooks/useAlquilerEuros';
 import createColorScale from './utils/colorScale.js';
 
 function App() {
-  const { records, years, sizeOptions, getFiltered } = useIndiceData();
+  const { records, years, getFiltered } = useAlquilerEuros();
   const minYear = years[0];
   const maxYear = years[years.length - 1];
   const [from, setFrom] = useState(minYear);
   const [to, setTo] = useState(maxYear);
-  const [size, setSize] = useState('Total');
 
   const STEP = 1;
   const MIN = minYear;
@@ -72,10 +71,10 @@ function App() {
   const [selectedCca, setSelectedCca] = useState(null);
 
   const filtered = useMemo(
-    () => getFiltered({ from, to, size }),
-    [getFiltered, from, to, size]
+    () => getFiltered({ from, to }),
+    [getFiltered, from, to]
   );
-  const vals = filtered.map(d => d.valor);
+  const vals = filtered.map(d => d.euros_m2);
   const colorDomain = vals.length ? [Math.min(...vals), Math.max(...vals)] : [0, 1];
   const colorScale = useMemo(
     () => (colorDomain ? createColorScale(colorDomain) : null),
@@ -89,13 +88,6 @@ function App() {
     <div>
       <h1>Dashboard de alquileres</h1>
       <div className="controls">
-        <label>Tamaño:</label>
-        <select value={size} onChange={e => setSize(e.target.value)}>
-          <option value="Total">Total</option>
-          {sizeOptions.map(o => (
-            <option key={o}>{o}</option>
-          ))}
-        </select>
         <label>Años:</label>
         <YearRange
           values={[from, to]}

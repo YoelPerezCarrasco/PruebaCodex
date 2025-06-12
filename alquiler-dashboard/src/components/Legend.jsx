@@ -8,10 +8,11 @@ export default function Legend({ scale }) {
       <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
         <svg
           width={width}
-          height={24}
+          height={30}
           aria-label="leyenda"
           role="img"
         >
+        <text x={width / 2} y={10} fontSize={10} textAnchor="middle">€/m²</text>
         {rects.map((c, i) => {
           const [t0] = scale.invertExtent(c);
           return (
