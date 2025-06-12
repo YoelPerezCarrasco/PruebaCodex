@@ -49,19 +49,14 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
   const showTooltip = (id, info, event) => {
     if (!tooltipRef.current) return;
     const name = provinceNames[id] || `Provincia ${id}`;
-    const indice = info?.indice;
-    const euros = info?.euros;
+    const euros = info;
     tooltipRef.current
       .html(
-        `<strong>${name}</strong><br/>Índice: ${
-          indice != null && !Number.isNaN(indice)
-            ? indice.toFixed(1).replace('.', ',')
-            : 'Sin dato'
-        }<br/>€: ${
+        `<strong>${name}</strong><br/>Alquiler medio: ${
           euros != null && !Number.isNaN(euros)
-            ? euros.toFixed(0).replace('.', ',')
+            ? euros.toFixed(2).replace('.', ',')
             : 'Sin dato'
-        }`
+        } €/m²`
       )
       .style('left', `${event.pageX + 10}px`)
       .style('top', `${event.pageY + 10}px`)
@@ -90,11 +85,8 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
     projection.fitSize([width, height], { type: 'FeatureCollection', features });
 
     const values = d3.rollup(
-      filtered.filter(d => d.valor != null && !Number.isNaN(d.valor)),
-      v => ({
-        indice: d3.mean(v, d => d.valor),
-        euros: d3.mean(v, d => d.euros),
-      }),
+      filtered.filter(d => d.euros_m2 != null && !Number.isNaN(d.euros_m2)),
+      v => d3.mean(v, d => d.euros_m2),
       d => d.cod_provincia
     );
 
@@ -129,8 +121,8 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
       .transition()
       .duration(600)
       .attr('fill', d => {
-        const val = values.get(d.id);
-        return val != null ? color(val.indice) : '#ccc';
+        const v = values.get(d.id);
+        return v != null ? color(v) : '#ccc';
       });
   }, [features, filtered, colorScale, onSelect, selectedCca]);
 

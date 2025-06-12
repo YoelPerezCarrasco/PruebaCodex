@@ -15,8 +15,7 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       .rollups(
         filtered,
         v => ({
-          valor: d3.mean(v, d => d.valor),
-          euros: d3.mean(v, d => d.euros),
+          euros_m2: d3.mean(v, d => d.euros_m2),
           poblacion: v.length,
         }),
         d => provToCca[d.cod_provincia]
@@ -34,7 +33,7 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       .attr('y', d => d.y0)
       .attr('width', d => d.x1 - d.x0)
       .attr('height', d => d.y1 - d.y0)
-      .attr('fill', d => scale(d.data.valor))
+      .attr('fill', d => scale(d.data.euros_m2))
       .attr('stroke', '#222')
       .style('opacity', d => (selectedCca && d.data.cca !== selectedCca ? 0.3 : 1))
       .on('click', (e, d) => onSelect && onSelect(d.data.cca))
@@ -42,10 +41,10 @@ function Treemap({ filtered, onSelect, selectedCca, colorDomain }) {
       .data(d => [d])
       .join('title')
       .text(d => {
-        const v = d.data.valor;
+        const v = d.data.euros_m2;
         return `${ccaNames[d.data.cca]}: ${
-          v != null ? v.toFixed(1).replace('.', ',') : 'Sin dato'
-        }`;
+          v != null ? v.toFixed(2).replace('.', ',') : 'Sin dato'
+        } €/m²`;
       });
   }, [filtered, selectedCca, colorDomain, onSelect]);
 
