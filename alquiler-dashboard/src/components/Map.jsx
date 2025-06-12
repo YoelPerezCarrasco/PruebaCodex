@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
+import { scaleSequential } from 'd3-scale';
 import provinceNames from '../utils/provinceNames.js';
-import provToCca from '../utils/provToCca.js';
-import createColorScale from '../utils/colorScale.js';
 
 const DEFAULT_WIDTH = 700;
 const DEFAULT_HEIGHT = 550;
 
-export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca }) {
+export default function Map({ filtered, euroDomain }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const tooltipRef = useRef(null);
   const [features, setFeatures] = useState(null);
+  const valuesRef = useRef(new Map());
 
   useEffect(() => {
     const div = d3
@@ -41,28 +41,17 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
     load();
   }, []);
 
-  const colorScale = useMemo(
-    () => (colorScaleDomain ? createColorScale(colorScaleDomain) : null),
-    [colorScaleDomain]
-  );
 
-  const showTooltip = (id, info, event) => {
+  const showTooltip = (id, event) => {
     if (!tooltipRef.current) return;
     const name = provinceNames[id] || `Provincia ${id}`;
-    const indice = info?.indice;
-    const euros = info?.euros;
+    const v = valuesRef.current.get(id);
+    const text =
+      v != null
+        ? `${name} – ${v.toFixed(2).replace('.', ',')} €/m²`
+        : `${name} – Sin dato`;
     tooltipRef.current
-      .html(
-        `<strong>${name}</strong><br/>Índice: ${
-          indice != null && !Number.isNaN(indice)
-            ? indice.toFixed(1).replace('.', ',')
-            : 'Sin dato'
-        }<br/>€: ${
-          euros != null && !Number.isNaN(euros)
-            ? euros.toFixed(0).replace('.', ',')
-            : 'Sin dato'
-        }`
-      )
+      .text(text)
       .style('left', `${event.pageX + 10}px`)
       .style('top', `${event.pageY + 10}px`)
       .transition()
@@ -90,15 +79,15 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
     projection.fitSize([width, height], { type: 'FeatureCollection', features });
 
     const values = d3.rollup(
-      filtered.filter(d => d.valor != null && !Number.isNaN(d.valor)),
-      v => ({
-        indice: d3.mean(v, d => d.valor),
-        euros: d3.mean(v, d => d.euros),
-      }),
+      filtered.filter(d => d.euros != null && !Number.isNaN(d.euros)),
+      v => d3.mean(v, d => d.euros),
       d => d.cod_provincia
     );
+    valuesRef.current = values;
 
-    const color = colorScale;
+    const color = scaleSequential()
+      .domain(euroDomain)
+      .interpolator(t => d3.interpolateLab('#e0e0e0', '#082567')(t));
 
     const paths = svg
       .selectAll('path')
@@ -106,15 +95,8 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
       .join('path')
       .attr('d', path)
       .attr('stroke', '#666')
-      .style('opacity', d =>
-        selectedCca && provToCca[d.id] !== selectedCca ? 0.2 : 1
-      )
-      .on('click', (event, d) => {
-        if (onSelect) onSelect(d.id);
-      })
       .on('mouseenter', (event, f) => {
-        const info = values.get(f.id);
-        showTooltip(f.id, info, event);
+        showTooltip(f.id, event);
       })
       .on('mouseleave', hideTooltip)
       .each(function (d) {
@@ -130,9 +112,9 @@ export default function Map({ filtered, colorScaleDomain, onSelect, selectedCca 
       .duration(600)
       .attr('fill', d => {
         const val = values.get(d.id);
-        return val != null ? color(val.indice) : '#ccc';
+        return val != null ? color(val) : '#ccc';
       });
-  }, [features, filtered, colorScale, onSelect, selectedCca]);
+  }, [features, filtered, euroDomain]);
 
   useEffect(draw, [draw]);
 

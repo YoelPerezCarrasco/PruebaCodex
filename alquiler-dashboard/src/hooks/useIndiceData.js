@@ -79,5 +79,26 @@ export default function useIndiceData() {
     return d3.extent(vals);
   }, []);
 
-  return { records, years, sizeOptions, getFiltered, domain };
+  const getByYearSize = useCallback(
+    (year, size) => records.filter(d => d.anio === year && d.tam === size),
+    [records]
+  );
+
+  const domainEuros = useCallback(
+    (year, size) => {
+      const filtered = getByYearSize(year, size);
+      return d3.extent(filtered, d => d.euros);
+    },
+    [getByYearSize]
+  );
+
+  return {
+    records,
+    years,
+    sizeOptions,
+    getFiltered,
+    domain,
+    getByYearSize,
+    domainEuros,
+  };
 }
